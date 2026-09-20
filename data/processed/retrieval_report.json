@@ -1,5 +1,5 @@
 {
-  "dense_only": {
+  "semantic_only": {
     "top_k": 5,
     "per_query": [
       {
@@ -547,7 +547,7 @@
       "mrr": 0.5841025641025641
     }
   },
-  "hybrid_alpha_1.0": {
+  "fused_w1.0": {
     "top_k": 5,
     "per_query": [
       {
@@ -1095,7 +1095,7 @@
       "mrr": 0.7389743589743589
     }
   },
-  "hybrid_alpha_0.7": {
+  "fused_w0.7": {
     "top_k": 5,
     "per_query": [
       {
@@ -1643,7 +1643,7 @@
       "mrr": 0.6923076923076923
     }
   },
-  "hybrid_alpha_0.5": {
+  "fused_w0.5": {
     "top_k": 5,
     "per_query": [
       {
@@ -2191,7 +2191,7 @@
       "mrr": 0.6564102564102564
     }
   },
-  "hybrid_alpha_0.3": {
+  "fused_w0.3": {
     "top_k": 5,
     "per_query": [
       {
