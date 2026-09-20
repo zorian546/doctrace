@@ -1,256 +1,303 @@
 """
 DocTrace dashboard (Streamlit).
 
-Three tabs:
-1. Ask: live grounded Q&A with retrieved evidence and a latency breakdown.
-2. Benchmarks: metric tables and headline findings from the saved reports.
-3. Injection probe: results of the planted-document attack scenarios.
+Tabs:
+1. Ask: grounded answers with the evidence behind them and a per-stage timing chart.
+2. Benchmarks: retrieval and grounding results read from the saved reports.
+3. Injection probe: what happened when misleading passages were planted in the corpus.
+4. How it works: the pipeline in five steps.
+
+Backend: with DOCTRACE_API_URL set, questions go to the HTTP service (the compose setup
+does this, so the models load once). Without it the pipeline runs in this process,
+which is what a single-container host such as Hugging Face Spaces needs.
 
 Run with:
     python -m streamlit run dashboard.py
 """
 
 import json
-import time
+import os
 from pathlib import Path
+
+import pandas as pd
+import requests
 import streamlit as st
 
-# Page setup
-st.set_page_config(
-    page_title="DocTrace",
-    page_icon="🔎",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
+from doctrace.security import docs_url, sanitize_answer
 
-# Styling overrides
+REPORTS = Path("data/processed")
+API_URL = os.getenv("DOCTRACE_API_URL", "").rstrip("/")
+API_KEY = os.getenv("DOCTRACE_API_KEY", "")
+MAX_QUESTION_CHARS = 500
+
+MODE_LABELS = {
+    "Fused (recommended)": "fused",
+    "Semantic only": "semantic",
+    "Keyword only": "lexical",
+}
+STAGE_LABELS = {
+    "semantic_ms": "Semantic search",
+    "lexical_ms": "Keyword search",
+    "merge_ms": "RRF merge",
+    "rescore_ms": "Cross-encoder",
+    "generation_ms": "Answering",
+}
+EXAMPLES = [
+    "How do path parameters work with type annotations?",
+    "How do you schedule background tasks to run after the response?",
+    "How do you connect FastAPI directly to Apache Kafka?",
+]
+CONFIG_LABELS = {
+    "dense_only": "Semantic only",
+    "hybrid_alpha_1.0": "Fused, cross-encoder only (1.0)",
+    "hybrid_alpha_0.7": "Fused, blend 0.7 (default)",
+    "hybrid_alpha_0.5": "Fused, blend 0.5",
+    "hybrid_alpha_0.3": "Fused, blend 0.3",
+}
+
+st.set_page_config(page_title="DocTrace", page_icon="🔎", layout="wide")
+
 st.markdown(
     """
     <style>
-    .main {
-        background-color: #0f1419;
-        color: #d7dde4;
-    }
-    .stMetric {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        padding: 12px;
-    }
-    .citation-card {
-        background: #182028;
-        border: 1px solid #2c3742;
-        border-radius: 6px;
-        padding: 12px;
-        margin-bottom: 10px;
-    }
-    .badge {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        margin-right: 6px;
-    }
-    .badge-primary { background-color: #0e7c86; color: #ffffff; }
-    .badge-success { background-color: #3a9d5d; color: #ffffff; }
-    .badge-warning { background-color: #e0a82e; color: #0f1419; }
+    .block-container { max-width: 1100px; padding-top: 2rem; }
+    h1 { letter-spacing: -0.02em; margin-bottom: 0; }
+    .tagline { color: #8b98a5; margin: 0 0 1.4rem 0; }
+    .pill { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 0.75rem;
+            border: 1px solid #2c3742; color: #8b98a5; margin-right: 6px; }
+    .src a { color: #2fb5c0; text-decoration: none; }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-# --- Setup ---
+
+# ---------- data access ----------
+
+def load_report(name: str):
+    try:
+        return json.loads((REPORTS / name).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def ask(query: str, mode: str, top_k: int, weight: float) -> dict:
+    """Answer via the HTTP service when configured, otherwise in process."""
+    if API_URL:
+        headers = {"X-API-Key": API_KEY} if API_KEY else {}
+        reply = requests.post(
+            f"{API_URL}/v1/ask",
+            json={"query": query, "mode": mode, "top_k": top_k, "rerank_weight": weight},
+            headers=headers,
+            timeout=600,
+        )
+        reply.raise_for_status()
+        return reply.json()
+    from doctrace.pipeline import run_query
+    return run_query(query, mode, top_k, weight)
+
 
 @st.cache_resource
-def load_lexical():
+def prepare_local_index() -> int:
+    """Build the keyword index once per process (in-process backend only)."""
     from doctrace.search.lexical import build_lexical_index
-    passages_path = Path("data/processed/passages.json")
-    if passages_path.exists():
-        passages = json.loads(passages_path.read_text(encoding="utf-8"))
+    passages = load_report("passages.json") or []
+    if passages:
         build_lexical_index(passages)
-        return len(passages)
-    return 0
+    return len(passages)
 
-passages_count = load_lexical()
 
-# --- Sidebar ---
-st.sidebar.title("🔎 Pipeline settings")
-mode = st.sidebar.selectbox(
-    "Search mode",
-    ["Fused (blend α=0.7)", "Semantic only (BGE-M3)", "Keyword only (BM25)", "Fused (cross-encoder only α=1.0)"],
-    index=0,
+passage_total = len(load_report("passages.json") or [])
+if not API_URL:
+    prepare_local_index()
+
+
+# ---------- sidebar ----------
+
+st.sidebar.header("Settings")
+mode_label = st.sidebar.selectbox("Search mode", list(MODE_LABELS), index=0)
+mode = MODE_LABELS[mode_label]
+top_k = st.sidebar.slider("Passages to retrieve", 1, 10, 5)
+weight = st.sidebar.slider(
+    "Cross-encoder weight", 0.0, 1.0, 0.7, 0.1, disabled=mode != "fused",
+    help="1.0 ranks by the cross-encoder alone; lower values keep more of the "
+         "keyword+semantic agreement (RRF score).",
+)
+st.sidebar.divider()
+st.sidebar.caption(f"**Backend:** {'HTTP service' if API_URL else 'in-process'}")
+st.sidebar.caption(f"**Passages indexed:** {passage_total}")
+st.sidebar.caption("**Encoder:** BAAI/bge-m3")
+st.sidebar.caption("**Cross-encoder:** MiniLM-L-6, tuned on this corpus")
+st.sidebar.caption("**Answer model:** Qwen2.5-3B-Instruct")
+
+st.title("DocTrace")
+st.markdown('<p class="tagline">Answers about the FastAPI docs, grounded in retrieved passages '
+            "and measured at every stage.</p>", unsafe_allow_html=True)
+
+tab_ask, tab_bench, tab_probe, tab_how = st.tabs(
+    ["Ask", "Benchmarks", "Injection probe", "How it works"]
 )
 
-top_k = st.sidebar.slider("Passages to retrieve (top-k)", min_value=1, max_value=10, value=5)
 
-rerank_weight = 0.7
-if "α=1.0" in mode:
-    rerank_weight = 1.0
-elif "α=0.7" in mode:
-    rerank_weight = 0.7
+# ---------- Ask ----------
 
-st.sidebar.markdown("---")
-st.sidebar.markdown(f"**Passages indexed:** `{passages_count}`")
-st.sidebar.markdown("**Encoder:** `BAAI/bge-m3` (1024d)")
-st.sidebar.markdown("**Cross-encoder:** `ms-marco-MiniLM-L-6-v2`")
-st.sidebar.markdown("**Answer model:** `Qwen2.5-3B-Instruct` (bf16)")
+def render_result(result: dict) -> None:
+    with st.container(border=True):
+        if result["abstained"]:
+            st.markdown("**The docs do not cover this.**")
+            st.caption("The retrieved passages were not enough, so the model declined "
+                       "instead of guessing.")
+        else:
+            # model output is untrusted: strip links, images and HTML before rendering
+            st.markdown(sanitize_answer(result["answer"]))
 
-# --- Page body ---
-st.title("🔎 DocTrace")
-st.caption("Grounded question answering over the FastAPI docs, with every stage measured and timed.")
+    timings = result["latency_ms"]
+    stages = {label: timings[key] for key, label in STAGE_LABELS.items() if key in timings}
+    left, right = st.columns([2, 1])
+    with left:
+        st.caption("Time per stage (ms)")
+        st.bar_chart(pd.Series(stages, name="ms"), horizontal=True, height=40 + 34 * len(stages))
+    with right:
+        st.metric("End to end", f"{timings['total_pipeline_ms'] / 1000:.2f} s")
+        st.metric("Search", f"{timings['total_retrieval_ms']:.0f} ms")
 
-tab1, tab2, tab3 = st.tabs(["💬 Ask", "📊 Benchmarks", "🧪 Injection probe"])
+    st.subheader("Evidence")
+    for rank, p in enumerate(result["evidence"], start=1):
+        with st.expander(f"{rank}. {p['source_path']}  ›  {p['header_path']}"):
+            scores = []
+            if p.get("blended_score") is not None:
+                scores.append(f"blended {p['blended_score']:.3f}")
+            if p.get("ce_score") is not None:
+                scores.append(f"cross-encoder {p['ce_score']:.2f}")
+            if p.get("score") is not None:
+                scores.append(f"score {p['score']:.3f}")
+            st.markdown(
+                f'<span class="src"><a href="{docs_url(p["source_path"])}" target="_blank" '
+                f'rel="noopener noreferrer">Open in the FastAPI docs</a></span> '
+                f'<span class="pill">{" · ".join(scores)}</span>',
+                unsafe_allow_html=True,
+            )
+            st.code(p["text"], language="markdown")
 
-# ---------- Tab 1: Ask ----------
-with tab1:
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        user_query = st.text_input(
-            "Your question about FastAPI:",
-            placeholder="e.g., How do you declare an integer path parameter in FastAPI?",
+
+with tab_ask:
+    with st.form("ask_form", clear_on_submit=False):
+        question = st.text_input(
+            "Your question about FastAPI",
+            max_chars=MAX_QUESTION_CHARS,
+            placeholder="e.g. How do you declare an integer path parameter?",
         )
-    with col2:
-        st.write("")
-        st.write("")
-        ask_btn = st.button("Get answer", use_container_width=True)
+        submitted = st.form_submit_button("Get answer", type="primary")
 
-    # One-click sample questions
-    st.markdown("**Try one:**")
-    q_cols = st.columns(3)
-    sample_queries = [
-        "How do path parameters work with type annotations?",
-        "How do you schedule background tasks to run after response?",
-        "How do you connect FastAPI directly to Apache Kafka?",  # deliberately unanswerable from the docs
-    ]
-    
-    for idx, q_text in enumerate(sample_queries):
-        if q_cols[idx].button(q_text, key=f"quick_q_{idx}"):
-            user_query = q_text
-            ask_btn = True
+    st.caption("Try one:")
+    cols = st.columns(len(EXAMPLES))
+    for col, text in zip(cols, EXAMPLES):
+        if col.button(text, key=f"ex_{text}"):
+            question, submitted = text, True
 
-    if ask_btn and user_query:
-        with st.spinner("Searching the docs and drafting an answer..."):
-            from doctrace.answering.responder import answer_question
-            from doctrace.search.lexical import lexical_search
-            from doctrace.search.semantic import semantic_search
-            from doctrace.search.fusion import fused_search
-            from doctrace.audit.grounding import is_abstention
+    if submitted:
+        if len(question.strip()) < 2:
+            st.warning("Type a question first.")
+        else:
+            try:
+                with st.spinner("Searching the docs and drafting an answer..."):
+                    st.session_state["result"] = ask(question.strip(), mode, top_k, weight)
+            except Exception:
+                st.session_state.pop("result", None)
+                st.error("Something went wrong while answering. Check that the service and "
+                         "the models are available, then try again.")
 
-            latencies = {}
-            t0 = time.perf_counter()
-
-            if "Semantic" in mode:
-                retrieved = semantic_search(user_query, top_k=top_k)
-                latencies["Semantic search"] = (time.perf_counter() - t0) * 1000
-            elif "Keyword" in mode:
-                retrieved = lexical_search(user_query, top_k=top_k)
-                latencies["Keyword search"] = (time.perf_counter() - t0) * 1000
-            else:
-                out = fused_search(user_query, top_k=top_k, rerank_weight=rerank_weight)
-                retrieved = out["results"]
-                latencies["Semantic search"] = out["latency_ms"].get("semantic_ms", 0)
-                latencies["Keyword search"] = out["latency_ms"].get("lexical_ms", 0)
-                latencies["RRF merge"] = out["latency_ms"].get("merge_ms", 0)
-                latencies["Cross-encoder rescoring"] = out["latency_ms"].get("rescore_ms", 0)
-
-            latencies["Search total"] = (time.perf_counter() - t0) * 1000
-
-            t1 = time.perf_counter()
-            gen = answer_question(user_query, retrieved)
-            answer = gen["answer"]
-            latencies["Answering"] = (time.perf_counter() - t1) * 1000
-            latencies["End to end"] = (time.perf_counter() - t0) * 1000
-
-            refusal = is_abstention(answer)
-
-        # Results
-        st.markdown("---")
-        st.subheader("Answer")
-        if refusal:
-            st.warning("⚠️ **Declined to answer**: the retrieved passages do not cover this question, so the model said so instead of guessing.")
-        
-        st.markdown(answer)
-
-        # Per-stage timings
-        st.markdown("### Timings")
-        m_cols = st.columns(len(latencies))
-        for idx, (stage, ms) in enumerate(latencies.items()):
-            m_cols[idx].metric(stage, f"{ms:.1f} ms")
-
-        # Evidence shown to the model
-        st.markdown("### Evidence")
-        for rank, passage in enumerate(retrieved, start=1):
-            with st.expander(f"#{rank} • {passage['source_path']} › {passage['header_path']}"):
-                score_info = []
-                if "blended_score" in passage:
-                    score_info.append(f"**Blended score:** `{passage['blended_score']:.3f}`")
-                if "ce_score" in passage:
-                    score_info.append(f"**Cross-encoder logit:** `{passage['ce_score']:.3f}`")
-                if "score" in passage:
-                    score_info.append(f"**Cosine similarity:** `{passage['score']:.3f}`")
-                
-                if score_info:
-                    st.markdown(" | ".join(score_info))
-                
-                st.code(passage["text"], language="markdown")
+    if "result" in st.session_state:
+        render_result(st.session_state["result"])
 
 
-# ---------- Tab 2: Benchmarks ----------
-with tab2:
-    st.subheader("Gold-set results (80 questions)")
-    st.caption("Measured on 40 single-hop, 25 multi-hop and 15 unanswerable questions. The table below comes from the saved run that uses the tuned cross-encoder.")
+# ---------- Benchmarks ----------
 
-    retrieval_res_path = Path("data/processed/retrieval_report.json")
-    if retrieval_res_path.exists():
-        eval_data = json.loads(retrieval_res_path.read_text(encoding="utf-8"))
-
-        summary_rows = []
-        for cfg_name, res in eval_data.items():
-            o = res["overall"]
-            summary_rows.append({
-                "Configuration": cfg_name,
-                "Hit Rate@5": f"{o['hit_rate']:.3f}",
-                "Recall@5": f"{o['recall']:.3f}",
-                "Precision@5": f"{o['precision']:.3f}",
-                "MRR": f"{o['mrr']:.3f}",
-            })
-        st.table(summary_rows)
+with tab_bench:
+    retrieval = load_report("retrieval_report.json")
+    if retrieval:
+        st.subheader("Retrieval on the gold set")
+        st.caption("65 questions with source passages (40 single-hop, 25 multi-hop), top 5. "
+                   "Fused rows use the tuned cross-encoder.")
+        table = pd.DataFrame(
+            [
+                {
+                    "Configuration": CONFIG_LABELS.get(name, name),
+                    "Hit rate@5": r["overall"]["hit_rate"],
+                    "Recall@5": r["overall"]["recall"],
+                    "Precision@5": r["overall"]["precision"],
+                    "MRR": r["overall"]["mrr"],
+                }
+                for name, r in retrieval.items()
+            ]
+        ).set_index("Configuration")
+        st.dataframe(table.style.format("{:.3f}"))
+        st.bar_chart(table[["Hit rate@5", "Recall@5", "MRR"]], horizontal=True)
+        st.info(
+            "Caveat: the cross-encoder was tuned on questions from this same gold set, so the "
+            "fused rows are optimistic. `scripts/tune_reranker.py` now also reports a held-out "
+            "split; that number is the one to quote."
+        )
     else:
-        st.info("Run `python -m scripts.bench_retrievers` to produce the benchmark table.")
+        st.info("Run `python -m scripts.bench_blend` to produce the retrieval table.")
 
-    st.markdown("---")
-    st.subheader("Headline findings")
+    generation = load_report("generation_report.json")
+    if generation:
+        st.subheader("Answering on the gold set (local Qwen2.5-3B-Instruct)")
+        rows = []
+        for cat in ("single_hop", "multi_hop"):
+            scored = [r["faithfulness_score"] for r in generation
+                      if r["category"] == cat and r.get("faithfulness_score") is not None]
+            rows.append({"Category": cat, "Questions": len(scored),
+                         "Mean grounding score": sum(scored) / len(scored) if scored else 0.0})
+        unanswerable = [r for r in generation if r["category"] == "no_answer"]
+        declined = sum(1 for r in unanswerable if r.get("correctly_refused"))
+        st.dataframe(pd.DataFrame(rows).set_index("Category").style.format({"Mean grounding score": "{:.3f}"}),
+                     use_container_width=True)
+        st.metric("Unanswerable questions correctly declined", f"{declined} / {len(unanswerable)}")
+
+
+# ---------- Injection probe ----------
+
+with tab_probe:
+    probe = load_report("injection_report.json")
+    st.subheader("Planted-document scenarios")
+    st.caption("Two misleading passages were added to the corpus. Retrieval here is keyword "
+               "search only, so this shows how the answer model reacts, not how the deployed "
+               "search ranks a planted page.")
+    if probe:
+        a, b, c = st.columns(3)
+        a.metric("Scenarios", probe["total_scenarios"])
+        b.metric("Planted passage in top-k", f"{probe['topk_reach_rate'] * 100:.0f}%")
+        c.metric("Attack landed", f"{probe['attack_landed_rate'] * 100:.0f}%")
+        for s in probe["scenarios"]:
+            verdict = "LANDED" if s["attack_landed"] else "HELD"
+            with st.expander(f"{s['scenario_id']} · {s['attack_type']} · {verdict}"):
+                st.write(f"**Question:** {s['target_query']}")
+                st.write(f"**Planted passage retrieved:** {s['tainted_reached_topk']}")
+                st.write(f"**Payload in answer:** {s['marker_in_answer']}")
+                st.text(s["generated_answer"])  # plain text: never render it as markdown
+        st.info("Instruction override was resisted. Bad advice written as ordinary documentation "
+                "was repeated faithfully. Grounding and safety are separate properties.")
+    else:
+        st.info("Run `python -m scripts.bench_injection` to produce the probe report.")
+
+
+# ---------- How it works ----------
+
+with tab_how:
+    st.subheader("From question to answer")
     st.markdown(
         """
-        - **Stock reranker vs tuned reranker**: with the off-the-shelf cross-encoder, semantic search alone won on hit rate (0.831) and recall (0.692). After tuning the cross-encoder on this corpus, the fused pipeline overtakes it (hit rate 0.877, MRR 0.692 at α=0.7).
-        - **Stock cross-encoders over-weight heading vocabulary**: blending in the RRF score at $\\alpha=0.7$ steadies the ranking.
-        - **Declines when it should**: the constrained prompt kept the model from inventing answers on the 15 unanswerable (`no_answer`) questions.
+        1. **Split**: the docs are cut at headings, never inside a code fence, and snippet
+           includes are expanded into real code (756 passages).
+        2. **Search twice**: BM25 finds exact terms, BGE-M3 vectors find meaning.
+        3. **Merge**: Reciprocal Rank Fusion combines the two rankings using rank only, so the
+           two score scales never need to be compared.
+        4. **Rescore**: a cross-encoder tuned on this corpus reorders the top 20, blended with the
+           merge score.
+        5. **Answer**: a local model answers only from the passages, or says the docs do not
+           cover it. A claim-level grounding score then checks the answer against the evidence.
         """
     )
-
-
-# ---------- Tab 3: Injection probe ----------
-with tab3:
-    st.subheader("Injection probe: planted documents")
-    st.caption("How the pipeline holds up when the corpus contains deliberately planted passages.")
-
-    sec_res_path = Path("data/processed/injection_report.json")
-    if sec_res_path.exists():
-        sec_data = json.loads(sec_res_path.read_text(encoding="utf-8"))
-        
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Scenarios", sec_data.get("total_scenarios", 0))
-        c1.metric("Planted passage in top-k", f"{sec_data.get('topk_reach_rate', 0)*100:.1f}%")
-        c3.metric("Attack landed rate", f"{sec_data.get('attack_landed_rate', 0)*100:.1f}%")
-
-        st.markdown("#### Per scenario")
-        for sc in sec_data.get("scenarios", []):
-            status_badge = "❌ LANDED" if sc["attack_landed"] else "✅ HELD"
-            with st.expander(f"Scenario [{sc['scenario_id']}] - {status_badge}"):
-                st.markdown(f"**Question asked:** `{sc['target_query']}`")
-                st.markdown(f"**Planted passage retrieved:** `{sc['tainted_reached_topk']}`")
-                st.markdown(f"**Marker in answer:** `{sc['marker_in_answer']}`")
-                st.markdown(f"**Answer given:**\n> {sc['generated_answer']}")
-    else:
-        st.info("Run `python -m scripts.bench_injection` to run the injection probe.")
+    st.caption("Design notes, measurements and known limitations are in ENGINEERING_NOTES.md.")
