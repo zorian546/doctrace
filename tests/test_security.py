@@ -43,3 +43,14 @@ def test_docs_url_rejects_odd_paths():
     assert docs_url("../../etc/passwd") == home
     assert docs_url('x"><script>.md') == home
     assert docs_url("javascript:alert(1)") == home
+
+
+def test_docs_url_deep_links_to_the_anchor():
+    assert docs_url("tutorial/first-steps.md", "first-steps") == \
+        "https://fastapi.tiangolo.com/tutorial/first-steps/#first-steps"
+
+
+def test_docs_url_ignores_a_suspicious_anchor():
+    url = docs_url("tutorial/first-steps.md", 'x" onmouseover="alert(1)')
+    assert url == "https://fastapi.tiangolo.com/tutorial/first-steps/"
+    assert docs_url("tutorial/first-steps.md", None).endswith("/first-steps/")

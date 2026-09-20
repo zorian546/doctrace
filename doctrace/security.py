@@ -32,12 +32,20 @@ def sanitize_answer(answer: str) -> str:
     return "".join(p if p.startswith("```") else _clean_prose(p) for p in parts)
 
 
-def docs_url(source_path: str) -> str:
-    """Public page for a source file such as 'tutorial/first-steps.md'. Anything that
-    is not a plain relative markdown path falls back to the docs home page."""
+def docs_url(source_path: str, anchor: str | None = None) -> str:
+    """Public page for a source file such as 'tutorial/first-steps.md', deep-linked to
+    `anchor` when one is given.
+
+    Both values come from the corpus, which is third-party text, so anything that is not
+    a plain relative markdown path or a simple slug is refused rather than placed in an
+    href: that is where a `javascript:` or protocol-relative URL would land.
+    """
     if not re.fullmatch(r"[\w\-./]+\.md", source_path) or ".." in source_path:
         return "https://fastapi.tiangolo.com/"
     page = source_path[:-3]
     if page.endswith("/index"):
         page = page[: -len("index")]
-    return f"https://fastapi.tiangolo.com/{page.rstrip('/')}/"
+    url = f"https://fastapi.tiangolo.com/{page.rstrip('/')}/"
+    if anchor and re.fullmatch(r"[\w-]+", anchor):
+        url += f"#{anchor}"
+    return url

@@ -112,6 +112,7 @@ class EvidencePassage(BaseModel):
     id: int
     source_path: str
     header_path: str
+    anchor: Optional[str] = None
     text: str
     score: Optional[float] = None
     ce_score: Optional[float] = None

@@ -48,11 +48,12 @@ EXAMPLES = [
     "How do you connect FastAPI directly to Apache Kafka?",
 ]
 CONFIG_LABELS = {
-    "dense_only": "Semantic only",
-    "hybrid_alpha_1.0": "Fused, cross-encoder only (1.0)",
-    "hybrid_alpha_0.7": "Fused, blend 0.7 (default)",
-    "hybrid_alpha_0.5": "Fused, blend 0.5",
-    "hybrid_alpha_0.3": "Fused, blend 0.3",
+    "semantic_only": "Semantic only",
+    "lexical_only": "Keyword only (BM25)",
+    "fused_w1.0": "Fused, cross-encoder only",
+    "fused_w0.7": "Fused, blend 0.7 (default)",
+    "fused_w0.5": "Fused, blend 0.5",
+    "fused_w0.3": "Fused, blend 0.3",
 }
 
 st.set_page_config(page_title="DocTrace", page_icon="🔎", layout="wide")
@@ -172,7 +173,7 @@ def render_result(result: dict) -> None:
             if p.get("score") is not None:
                 scores.append(f"score {p['score']:.3f}")
             st.markdown(
-                f'<span class="src"><a href="{docs_url(p["source_path"])}" target="_blank" '
+                f'<span class="src"><a href="{docs_url(p["source_path"], p.get("anchor"))}" target="_blank" '
                 f'rel="noopener noreferrer">Open in the FastAPI docs</a></span> '
                 f'<span class="pill">{" · ".join(scores)}</span>',
                 unsafe_allow_html=True,
@@ -239,15 +240,15 @@ with tab_bench:
             "split; that number is the one to quote."
         )
     else:
-        st.info("Run `python -m scripts.bench_blend` to produce the retrieval table.")
+        st.info("Run `python -m scripts.bench_retrievers` to produce the retrieval table.")
 
     generation = load_report("generation_report.json")
     if generation:
         st.subheader("Answering on the gold set (local Qwen2.5-3B-Instruct)")
         rows = []
         for cat in ("single_hop", "multi_hop"):
-            scored = [r["faithfulness_score"] for r in generation
-                      if r["category"] == cat and r.get("faithfulness_score") is not None]
+            scored = [r["grounding_score"] for r in generation
+                      if r["category"] == cat and r.get("grounding_score") is not None]
             rows.append({"Category": cat, "Questions": len(scored),
                          "Mean grounding score": sum(scored) / len(scored) if scored else 0.0})
         unanswerable = [r for r in generation if r["category"] == "no_answer"]
