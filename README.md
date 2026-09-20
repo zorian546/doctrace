@@ -7,7 +7,7 @@ pinned: false
 
 # DocTrace
 
-Question answering over the official FastAPI documentation, built so that every claim about its quality can be checked. DocTrace retrieves passages, answers only from them, and ships the harness that measures whether retrieval found the right material, whether the answer stayed grounded in it, and whether the system declined when the docs had nothing to say.
+Question answering over the official FastAPI documentation, built so that its claims about quality can be checked. DocTrace retrieves passages, answers only from them, and ships the harness that measures whether retrieval found the right material, whether the answer stayed grounded in it, and whether the system declined when the docs had nothing to say.
 
 ## Why it exists
 
@@ -65,8 +65,8 @@ Each stage is its own package (`doctrace/corpus`, `vectors`, `search`, `answerin
 Full detail and caveats are in `ENGINEERING_NOTES.md`.
 
 - With the stock cross-encoder, semantic search alone beat the fused pipeline: 0.831 Hit Rate@5 and 0.692 Recall@5 across the 65 questions that have gold passages. The cause turned out to be the reranker favouring heading vocabulary over the passage that actually states the answer.
-- Tuning that cross-encoder on this corpus's own hard negatives moved end-to-end MRR from 0.624 to 0.739 (+18.4%) and Hit Rate@5 from 0.769 to 0.877 (+14.0%), measured through the live pipeline.
-- The claim-level grounding score reached 0.971 (single-hop) and 0.914 (multi-hop) against Claude Sonnet 4.5, and parsed every one of the 65 answers. RAGAS's own faithfulness metric failed to parse its judge output on 4 of those 65.
+- Tuning that cross-encoder on this corpus's own hard negatives moved MRR from 0.624 to 0.739 and Hit Rate@5 from 0.769 to 0.877. Caveat: those figures include questions the model trained on, so they overstate the gain. `scripts/tune_reranker.py` now reports held-out questions separately; that re-run is still to do.
+- The claim-level grounding score reached 0.971 (single-hop) and 0.914 (multi-hop) in the first run against Claude Sonnet 4.5 (recorded at the time; those raw answers were later overwritten), and parsed every one of the 65 answers. RAGAS's own faithfulness metric failed to parse its judge output on 3 of the 65. The local Qwen2.5-3B run, which is saved in the repo, scores 0.769 and 0.715.
 - Hosted API credits ran out during evaluation, so answering moved to a local Qwen2.5-3B-Instruct. That needed its own reliability work, and it produced a real hosted-versus-local comparison instead of a workaround.
 
 ## Tech stack
@@ -99,6 +99,20 @@ Full detail and caveats are in `ENGINEERING_NOTES.md`.
 - `data/`: `raw/` holds the docs checkout (git-ignored, rebuilt by indexing); `processed/` holds the passage file and the saved reports.
 - `models/`: the tuned cross-encoder.
 - `tests/`: unit and integration tests.
+
+## Configuration and security
+
+Settings come from environment variables (see `.env.example`):
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `QDRANT_URL`, `QDRANT_API_KEY` | Vector store connection | required for semantic search |
+| `DOCTRACE_API_KEY` | If set, `POST /v1/ask` requires a matching `X-API-Key` header | unset (open) |
+| `DOCTRACE_HOST`, `DOCTRACE_PORT` | Where the service listens | `127.0.0.1`, `8000` |
+| `DOCTRACE_ALLOWED_ORIGINS` | Browser origins allowed by CORS | the local dashboard |
+| `DOCTRACE_API_URL` | Dashboard calls this service instead of loading the models itself | unset (in-process) |
+
+The service is built to run on localhost or behind a reverse proxy. It validates input sizes, does not echo internal errors, runs the container as a non-root user, and the dashboard strips links, images and HTML from model output before rendering it (a planted passage could otherwise exfiltrate data through a markdown image). The full list of what was reviewed and fixed is in the "Security review" section of `ENGINEERING_NOTES.md`. Rate limiting and TLS are left to a proxy.
 
 ## Running it
 
@@ -148,7 +162,7 @@ python -m scripts.tune_reranker
 python -m doctrace.service.server
 python -m streamlit run dashboard.py
 
-# Or with Docker Compose (HTTP service on 8000, dashboard on 8501)
+# Or with Docker Compose (HTTP service on 127.0.0.1:8000, dashboard on 127.0.0.1:8501)
 docker compose up --build
 ```
 
