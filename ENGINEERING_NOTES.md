@@ -9,18 +9,19 @@ What was built, what was measured, what surprised us, and what each result chang
 1. [Summary](#summary)
 2. [Base decisions](#base-decisions)
 3. [Corpus and splitting](#corpus-and-splitting)
-4. [First look at semantic search](#first-look-at-semantic-search)
-5. [Fused search and the first regression](#fused-search-and-the-first-regression)
-6. [Building the gold set](#building-the-gold-set)
-7. [Retrieval benchmark and root cause](#retrieval-benchmark-and-root-cause)
-8. [Answering, grounding, and the move to a local model](#answering-grounding-and-the-move-to-a-local-model)
-9. [Injection probe](#injection-probe)
-10. [Serving and the four operational bugs](#serving-and-the-four-operational-bugs)
-11. [Tuning the cross-encoder](#tuning-the-cross-encoder)
-12. [Security review](#security-review)
-13. [Cost](#cost)
-14. [Limitations](#limitations)
-15. [Bug index](#bug-index)
+4. [Reproducibility: pinning the corpus](#reproducibility-pinning-the-corpus)
+5. [First look at semantic search](#first-look-at-semantic-search)
+6. [Fused search and the first regression](#fused-search-and-the-first-regression)
+7. [Building the gold set](#building-the-gold-set)
+8. [Retrieval benchmark and root cause](#retrieval-benchmark-and-root-cause)
+9. [Answering, grounding, and the move to a local model](#answering-grounding-and-the-move-to-a-local-model)
+10. [Injection probe](#injection-probe)
+11. [Serving and the four operational bugs](#serving-and-the-four-operational-bugs)
+12. [Tuning the cross-encoder](#tuning-the-cross-encoder)
+13. [Security review](#security-review)
+14. [Cost](#cost)
+15. [Limitations](#limitations)
+16. [Bug index](#bug-index)
 
 ## Summary
 
@@ -46,6 +47,47 @@ The FastAPI docs are not a tidy corpus. The repo changed orgs mid-project (`tian
 **Splitting** happens at headings (`#` to `######`) while tracking code-fence state, so a `#` in a Python comment inside a fence never counts as a heading. Each passage keeps its full heading trail and, when present, the explicit `{ #anchor }` slug the docs supply. Slugs are captured rather than derived, because some headings contain raw HTML (a `<dfn>` tag, for example) that does not slugify consistently. Result: 756 passages, none with a broken fence.
 
 **A bug that only showed on another OS.** `source_path` was built with `str(path.relative_to(docs_root))`, which yields forward slashes on Linux and backslashes on Windows. Tests that only counted passages passed everywhere. One that matched an exact `source_path` failed only on Windows, with `next()` raising `StopIteration`. The fix, `path.relative_to(root).as_posix()`, matters beyond that test because the gold set's references (`file.md#anchor`) depend on consistent paths.
+
+## Reproducibility: pinning the corpus
+
+This came out of a late review, and it turned out to matter more than it looked.
+
+Indexing originally cloned the default branch of the FastAPI repo, so the corpus was
+whatever the docs said that day. Running it again now yields **757** passages rather than
+the 756 the benchmarks were measured on: upstream added an "AI agent skills" section to
+`tutorial/index.md`, and 485 other passages had text edits (a `www.` dropped from a URL,
+`uv run` added to command examples, and so on).
+
+A changing corpus is bad for comparing numbers over time, which is the obvious problem.
+The real problem is quieter. A passage's id is its index in `data/processed/passages.json`.
+The keyword index scores by list position, the vector store uses the same integer as its
+point id, and fusion merges the two result lists by that id. Insert one section near the
+front of the corpus and every later id shifts by one. If the passage file is rebuilt but
+the vector collection is not re-uploaded, semantic search still returns plausible ids and
+plausible scores, and each one now points at the neighbouring passage. The answer is then
+generated from text that was never retrieved. Nothing raises, nothing logs, and the
+symptom looks like the model suddenly getting worse.
+
+Two changes close it:
+
+1. **The docs are pinned** to commit `7d210a4a` (2026-07-21), fetched by sha with a
+   depth-1 sparse checkout, which also cut the download to 33MB and about 4 seconds.
+   That commit was found by walking upstream history backwards from the two edits above
+   until the regenerated corpus matched the tracked file exactly.
+   `tests/test_corpus_integrity.py` asserts the tracked corpus is 756 passages with the
+   fingerprint the manifest records, so an accidental rebuild cannot slip through review.
+
+2. **Both indexes are fingerprinted.** `scripts/build_index.py` writes a SHA-256 over the
+   ordered passage list to `data/processed/corpus_manifest.json`, and records it again
+   when those passages are uploaded. Semantic search compares the two before its first
+   query: equal means go, different raises `IndexMismatch` naming the command to re-run,
+   and nothing recorded logs a warning rather than failing, since a collection uploaded
+   before manifests existed is not evidence of a mismatch.
+
+The honest footnote is that the saved benchmark numbers were produced before any of this,
+on the same 756-passage corpus but with no fingerprint recorded. The pin makes every run
+from here on reproducible; it cannot retroactively prove the old runs used exactly this
+file, beyond the fact that the passage count and gold references line up.
 
 ## First look at semantic search
 
@@ -80,7 +122,7 @@ One regression in four queries is a symptom and not yet a diagnosis. Finding out
 
 ## Building the gold set
 
-The gold set has 80 questions built in three reviewed batches: 40 single_hop, 25 multi_hop and 15 no_answer. Each single_hop and multi_hop answer rests on real corpus text and carries an exact `source_chunks` reference (`file.md#header-anchor`). Each no_answer item was checked by searching the corpus for the topic before the answer was written, instead of assuming the topic was absent.
+The gold set has 80 questions built in three reviewed batches: 40 single_hop, 25 multi_hop and 15 no_answer. Each single_hop and multi_hop answer rests on real corpus text and carries an exact `source_passages` reference (`file.md#header-anchor`). Each no_answer item was checked by searching the corpus for the topic before the answer was written, instead of assuming the topic was absent.
 
 That checking caught real mistakes before they became ground truth:
 
@@ -261,6 +303,8 @@ A pass over the service and dashboard from an attacker's point of view found and
 | Snippet markers read from a third-party repo | A crafted `{* ../../../x *}` marker could read files outside the checkout | Resolved paths must stay inside the checkout |
 | `https=True` forced on the Qdrant client | A local `http://` instance could not connect | The client follows the URL scheme |
 | Both containers loaded the models onto one GPU | Two copies of a 6GB model on an 8GB card | Dashboard calls the API when `DOCTRACE_API_URL` is set |
+| Source paths and anchors went straight into `href` | Both come from third-party text; a crafted value is where a `javascript:` URL would land | `docs_url` accepts only a relative `.md` path and a plain slug, else it falls back to the docs home |
+| A rebuilt corpus could silently pair with a stale vector index | Answers generated from passages nobody retrieved, with no error (see Reproducibility) | Corpus fingerprints, compared before the first query |
 
 Not addressed, deliberately: rate limiting (the single model lock already serialises work, and a reverse proxy is the right place for limits), TLS (terminate at a proxy), and any defence against poisoned *advice* (see the injection probe). The service is meant to run on localhost or behind a proxy, not on the open internet as shipped.
 
@@ -288,7 +332,7 @@ Serving and evaluating with local open-weight models brings marginal cost to $0.
 5. **Planted bad advice gets through.** The injection probe shows a grounded answer repeats poisoned guidance; there is no separate safety layer. The probe has only two scenarios and uses keyword retrieval, so it demonstrates a failure mode and is not a security benchmark.
 6. **Small evaluation set.** 65 questions with gold passages is enough to see large effects (24% between encoders) and too few to separate small ones (0.877 vs 0.831 hit rate is three questions). One author wrote the questions, and the re-check covered 10 of 80.
 7. **The tuned cross-encoder was evaluated on its own training questions** (see the tuning section); held-out figures are pending.
-8. **The corpus is a moving target.** Indexing clones the default branch of the FastAPI repo, so a later run can produce a different passage count than 756 and can break gold references. Pin a commit before treating results as reproducible.
+8. **The corpus drifts upstream, which is now pinned rather than solved.** The docs are fixed at commit `7d210a4a`, so builds reproduce. Moving to newer docs means re-indexing, re-uploading the vectors and re-running every benchmark together; the gold set's anchor references would also need re-checking, since a renamed heading silently stops resolving.
 9. **Claims not reproducible from the repo:** the Claude Sonnet 4.5 row (raw answers overwritten), latency percentiles, and the stock-reranker sweep at weights 0.5 and 0.3.
 
 ## Bug index
