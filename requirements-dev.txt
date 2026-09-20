@@ -1,0 +1,12 @@
+# Everything the test suite needs, and nothing else.
+#
+# The ML packages in requirements.txt (torch, transformers, sentence-transformers) are
+# deliberately absent: those imports are deferred to first use, so the whole package
+# imports and the whole suite runs without them. That keeps a test run to seconds on a
+# machine with no GPU, and it is what CI installs.
+
+-r requirements-base.txt
+
+pytest
+httpx        # required by fastapi's TestClient
+pyflakes

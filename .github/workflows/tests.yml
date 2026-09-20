@@ -1,0 +1,30 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        # the tuned cross-encoder lives in Git LFS and no test needs it
+        with:
+          lfs: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      # No torch, no transformers, no sentence-transformers. Those imports are deferred
+      # to first use, so the suite runs on a plain runner in seconds.
+      - run: pip install -r requirements-dev.txt
+
+      - name: Lint
+        run: python -m pyflakes doctrace scripts tests dashboard.py
+
+      - name: Tests
+        run: python -m pytest -v

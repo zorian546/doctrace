@@ -29,7 +29,7 @@ RUN pip install --no-cache-dir --pre \
     --index-url https://download.pytorch.org/whl/nightly/cu128
 
 # Remaining packages. torch already satisfies its requirement, so pip leaves it alone.
-COPY requirements.txt .
+COPY requirements.txt requirements-base.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Run as an unprivileged user (uid 1000, which Hugging Face Spaces also expects).
@@ -44,6 +44,7 @@ ENV HOME=/home/doctrace HF_HOME=/home/doctrace/.cache/huggingface
 COPY --chown=doctrace:doctrace doctrace/ doctrace/
 COPY --chown=doctrace:doctrace data/processed/ data/processed/
 COPY --chown=doctrace:doctrace dashboard.py .
+COPY --chown=doctrace:doctrace .streamlit/ .streamlit/
 # Tuned cross-encoder. doctrace/search/fusion.py falls back to the stock model when
 # the weights are missing, so a build without Git LFS objects still runs, just
 # without the gain from tuning on this corpus.
@@ -54,10 +55,10 @@ USER doctrace
 EXPOSE 8000
 EXPOSE 8501
 
-# Default command starts the Streamlit dashboard on 8501. That suits single-container
-# hosts such as Hugging Face Spaces (Docker SDK), which run the image's default CMD and
-# route traffic to the app_port set in README.md. compose.yaml overrides `command:`
-# for both services: the HTTP service (`api`, port 8000) and the dashboard (`ui`, port 8501).
+# The default command starts the dashboard on 8501, which suits a single-container host
+# that runs the image's default CMD with no override. With no DOCTRACE_API_URL set, the
+# dashboard loads the models in its own process. compose.yaml instead runs two services:
+# the HTTP service (`api`, 8000) holds the models and the dashboard (`ui`, 8501) calls it.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health', timeout=3)" || exit 1
 

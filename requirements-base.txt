@@ -1,0 +1,22 @@
+# Dependencies that carry no heavy ML runtime. Imported directly by doctrace/ and the
+# dashboard, and enough on their own to run the test suite (see requirements-dev.txt).
+
+python-dotenv
+qdrant-client
+rank-bm25
+
+# Serving. fastapi, starlette and streamlit are pinned as a set: the older
+# fastapi 0.115.0 was built for starlette<0.39, while streamlit 1.59.2 needs
+# starlette>=0.40, so those two could not be installed together. fastapi 0.141.1
+# (built for starlette>=0.46) resolves it. This exact trio was run end to end.
+fastapi==0.141.1
+starlette==1.6.0
+uvicorn
+streamlit==1.59.2
+
+# Dashboard
+requests     # calls the HTTP service when DOCTRACE_API_URL is set
+# Unpinned: the dashboard uses only basic DataFrame and chart calls, and the full
+# runtime pins numpy (see requirements.txt), so the resolver picks a pandas that
+# matches whichever numpy is in play.
+pandas       # dashboard tables and charts
