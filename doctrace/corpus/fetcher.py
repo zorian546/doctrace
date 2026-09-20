@@ -2,14 +2,24 @@
 Corpus acquisition: pull the FastAPI docs and read them into memory.
 
 The tutorial/ and advanced/ sections are fetched as raw markdown through a sparse
-git clone and returned as {"source_path": ..., "text": ...} dicts.
+git checkout and returned as {"source_path": ..., "text": ...} dicts.
+
+The checkout is pinned to DOCS_COMMIT. The docs are edited often, and an unpinned
+build quietly changes the corpus underneath the evaluation: a section added upstream
+shifts every later passage id by one, which silently breaks the id agreement between
+the keyword index and the vector store (see doctrace/corpus/manifest.py). With the pin,
+`python -m scripts.build_index` reproduces data/processed/passages.json exactly, which
+is asserted by tests/test_corpus_integrity.py.
+
+To move to newer docs: bump DOCS_COMMIT, re-run the indexing script, re-upload the
+vectors, and re-run the benchmarks. All three, or the numbers stop matching the corpus.
 
 Worth knowing: these docs do not keep code inline. They reference it with a
 snippet-include marker such as `{* ../../docs_src/first_steps/tutorial001_py310.py *}`,
 and the code is stitched in at doc-build time. 80 of the 85 files in scope use it, so
 `read_docs()` expands every marker into a real fenced block before any splitting happens.
 
-A git clone is used rather than the GitHub contents API because the unauthenticated
+A git checkout is used rather than the GitHub contents API because the unauthenticated
 API allows only 60 requests an hour, and the upstream repo has changed orgs
 (tiangolo/fastapi -> fastapi/fastapi).
 """
@@ -20,6 +30,8 @@ import subprocess
 from pathlib import Path
 
 REPO_URL = "https://github.com/fastapi/fastapi.git"
+# Pinned upstream commit (2026-07-21). Produces exactly 756 passages.
+DOCS_COMMIT = "7d210a4a9f54f2744e50ce55c65eb852958478c5"
 REPO_ROOT = Path("data/raw/fastapi-repo")
 SPARSE_PATHS = ["docs/en/docs", "docs_src"]
 SUBSET_DIRS = ["tutorial", "advanced"]
@@ -31,30 +43,43 @@ SUBSET_DIRS = ["tutorial", "advanced"]
 SNIPPET_RE = re.compile(r"\{\*\s*(\S+)[^*]*\*\}")
 
 
-def pull_docs(force: bool = False) -> None:
-    """Sparse-clone docs/ and docs_src/ into data/raw/fastapi-repo.
+def _git(*args: str, cwd: Path) -> None:
+    subprocess.run(["git", *args], cwd=cwd, check=True)
 
-    Safe to call repeatedly: an existing checkout is left alone unless force=True.
+
+def pull_docs(force: bool = False) -> None:
+    """Fetch docs/ and docs_src/ at DOCS_COMMIT into data/raw/fastapi-repo.
+
+    Only the pinned commit is downloaded, and only the two directories needed, so this
+    stays small. Safe to call repeatedly: an existing checkout at the right commit is
+    left alone unless force=True.
     """
-    if REPO_ROOT.exists():
-        if not force:
+    if REPO_ROOT.exists() and not force:
+        if _checked_out_commit() == DOCS_COMMIT:
             return
+        # a checkout from a previous pin would silently produce a different corpus
+        shutil.rmtree(REPO_ROOT)
+    elif REPO_ROOT.exists():
         shutil.rmtree(REPO_ROOT)
 
-    REPO_ROOT.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(
-        [
-            "git", "clone", "--depth", "1",
-            "--filter=blob:none", "--sparse",
-            REPO_URL, str(REPO_ROOT),
-        ],
-        check=True,
-    )
-    subprocess.run(
-        ["git", "sparse-checkout", "set", *SPARSE_PATHS],
-        cwd=REPO_ROOT,
-        check=True,
-    )
+    REPO_ROOT.mkdir(parents=True, exist_ok=True)
+    _git("init", "--quiet", cwd=REPO_ROOT)
+    _git("remote", "add", "origin", REPO_URL, cwd=REPO_ROOT)
+    _git("sparse-checkout", "set", *SPARSE_PATHS, cwd=REPO_ROOT)
+    # fetching a single commit by sha keeps this to one revision instead of all history
+    _git("fetch", "--depth", "1", "--filter=blob:none", "origin", DOCS_COMMIT, cwd=REPO_ROOT)
+    _git("checkout", "--quiet", DOCS_COMMIT, cwd=REPO_ROOT)
+
+
+def _checked_out_commit() -> str | None:
+    try:
+        done = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT,
+            check=True, capture_output=True, text=True,
+        )
+        return done.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+        return None
 
 
 def _inline_snippets(raw_text: str, snippet_base: Path) -> str:
