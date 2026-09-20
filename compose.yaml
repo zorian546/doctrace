@@ -1,0 +1,49 @@
+# Runs the DocTrace containers. Qdrant is not a service here: the project talks to
+# a hosted Qdrant Cloud cluster (free tier) instead of a local instance (rationale
+# in ENGINEERING_NOTES.md). QDRANT_URL and QDRANT_API_KEY come from the .env file in the
+# project root; copy .env.example to .env and fill them in.
+
+services:
+  api:
+    build: .
+    command: ["python", "-m", "doctrace.service.server"]
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data/processed:/srv/doctrace/data/processed
+      # Keeps downloaded model weights (Qwen2.5-3B, BGE-M3, cross-encoder) across
+      # container restarts. Without it each new container pulls several GB from
+      # the HF Hub on its first query (about 35 minutes cold, see ENGINEERING_NOTES.md).
+      # `docker compose stop` / `start` keeps the volume; `docker compose down -v` deletes it.
+      - hf_cache:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  ui:
+    build: .
+    command: ["python", "-m", "streamlit", "run", "dashboard.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./data/processed:/srv/doctrace/data/processed
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    depends_on:
+      - api
+
+volumes:
+  hf_cache:
