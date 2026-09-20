@@ -9,7 +9,8 @@ import argparse
 import json
 from pathlib import Path
 
-from doctrace.corpus.fetcher import pull_docs, read_docs
+from doctrace.corpus.fetcher import DOCS_COMMIT, pull_docs, read_docs
+from doctrace.corpus.manifest import record_upload, write_manifest
 from doctrace.corpus.splitter import split_by_headings
 
 PASSAGES_PATH = Path("data/processed/passages.json")
@@ -41,15 +42,18 @@ def main() -> None:
 
     PASSAGES_PATH.parent.mkdir(parents=True, exist_ok=True)
     PASSAGES_PATH.write_text(json.dumps(passages, indent=2), encoding="utf-8")
+    manifest = write_manifest(passages, DOCS_COMMIT)
     print(f"Wrote {len(passages)} passages to {PASSAGES_PATH}")
+    print(f"Corpus fingerprint {manifest['fingerprint'][:12]} (docs pinned at {DOCS_COMMIT[:12]})")
     print("\nChecks passed.")
 
     if args.sync_qdrant:
-        from doctrace.search.semantic import ensure_collection, index_passages
+        from doctrace.search.semantic import COLLECTION, ensure_collection, index_passages
         print("\nUploading passages to Qdrant...")
         ensure_collection(recreate=args.recreate_collection)
         index_passages(passages)
-        print("Qdrant upload complete.")
+        record_upload(passages, COLLECTION)
+        print(f"Qdrant upload complete; recorded against collection {COLLECTION!r}.")
 
 
 if __name__ == "__main__":

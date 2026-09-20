@@ -3,20 +3,27 @@ Vector search over passages, backed by a Qdrant Cloud collection of BGE-M3 vecto
 and queried by cosine similarity.
 """
 
+import json
+import logging
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 
+from doctrace.corpus.manifest import check_alignment
 from doctrace.vectors.encoder import encode_texts, encode_query
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 COLLECTION = "doctrace_passages"
 VECTOR_DIM = 1024  # BGE-M3 output size
 
 _client: QdrantClient | None = None
+_alignment_checked = False
 
 
 def _get_client() -> QdrantClient:
@@ -32,6 +39,23 @@ def _get_client() -> QdrantClient:
             timeout=60,  # the free tier can stall on big requests
         )
     return _client
+
+
+def _verify_alignment_once() -> None:
+    """Before the first query, confirm the uploaded vectors and the local passages are
+    the same corpus. Ids are positions in that list, so a mismatch returns the wrong
+    text under right-looking ids (see doctrace/corpus/manifest.py)."""
+    global _alignment_checked
+    if _alignment_checked:
+        return
+    _alignment_checked = True  # a missing file should not re-check on every query
+    try:
+        passages = json.loads(Path("data/processed/passages.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return
+    warning = check_alignment(passages, COLLECTION)
+    if warning:
+        logger.warning("%s", warning)
 
 
 def ensure_collection(recreate: bool = False) -> None:
@@ -78,6 +102,7 @@ def index_passages(passages: list[dict], batch_size: int = 64) -> None:
 def semantic_search(query: str, top_k: int = 5) -> list[dict]:
     """Encode the query and return the top_k closest passages, as
     {"id", "score", "source_path", "header_path", "text"}."""
+    _verify_alignment_once()
     hits = _get_client().query_points(
         collection_name=COLLECTION,
         query=encode_query(query),
