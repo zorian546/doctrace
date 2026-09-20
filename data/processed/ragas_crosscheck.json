@@ -1,0 +1,392 @@
+[
+  {
+    "id": "sh_001",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_002",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_003",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_004",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_005",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_006",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_007",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_008",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_009",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_010",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "mh_001",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "mh_002",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "mh_003",
+    "grounding_score": 0.9230769230769231,
+    "ragas_faithfulness_score": null,
+    "diff": null
+  },
+  {
+    "id": "mh_004",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 0.8571428571428571,
+    "diff": 0.1428571428571429
+  },
+  {
+    "id": "sh_011",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_012",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_013",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_014",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 0.3333333333333333,
+    "diff": 0.6666666666666667
+  },
+  {
+    "id": "sh_015",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_016",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 0.8571428571428571,
+    "diff": 0.1428571428571429
+  },
+  {
+    "id": "sh_017",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_018",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_019",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 0.3333333333333333,
+    "diff": 0.6666666666666667
+  },
+  {
+    "id": "sh_020",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "mh_005",
+    "grounding_score": 0.9285714285714286,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0714285714285714
+  },
+  {
+    "id": "mh_006",
+    "grounding_score": 0.75,
+    "ragas_faithfulness_score": 0.8571428571428571,
+    "diff": 0.1071428571428571
+  },
+  {
+    "id": "mh_007",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "mh_008",
+    "grounding_score": 0.9,
+    "ragas_faithfulness_score": 0.6666666666666666,
+    "diff": 0.2333333333333334
+  },
+  {
+    "id": "mh_009",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_021",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 0.6666666666666666,
+    "diff": 0.33333333333333337
+  },
+  {
+    "id": "sh_022",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_023",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_024",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_025",
+    "grounding_score": 0.75,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.25
+  },
+  {
+    "id": "sh_026",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_027",
+    "grounding_score": 0.8,
+    "ragas_faithfulness_score": 0.5,
+    "diff": 0.30000000000000004
+  },
+  {
+    "id": "sh_028",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_029",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_030",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 0.8571428571428571,
+    "diff": 0.1428571428571429
+  },
+  {
+    "id": "mh_010",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 0.7142857142857143,
+    "diff": 0.2857142857142857
+  },
+  {
+    "id": "mh_011",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "mh_012",
+    "grounding_score": 0.7,
+    "ragas_faithfulness_score": null,
+    "diff": null
+  },
+  {
+    "id": "mh_013",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "mh_014",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 0.75,
+    "diff": 0.25
+  },
+  {
+    "id": "mh_015",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_031",
+    "grounding_score": 0.8333333333333334,
+    "ragas_faithfulness_score": 0.75,
+    "diff": 0.08333333333333337
+  },
+  {
+    "id": "sh_032",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_033",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 0.75,
+    "diff": 0.25
+  },
+  {
+    "id": "sh_034",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_035",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_036",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "sh_037",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 0.5,
+    "diff": 0.5
+  },
+  {
+    "id": "sh_038",
+    "grounding_score": 0.875,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.125
+  },
+  {
+    "id": "sh_039",
+    "grounding_score": 0.75,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.25
+  },
+  {
+    "id": "sh_040",
+    "grounding_score": 0.8333333333333334,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.16666666666666663
+  },
+  {
+    "id": "mh_016",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "mh_017",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "mh_018",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 0.8,
+    "diff": 0.19999999999999996
+  },
+  {
+    "id": "mh_019",
+    "grounding_score": 0.6666666666666666,
+    "ragas_faithfulness_score": 0.0,
+    "diff": 0.6666666666666666
+  },
+  {
+    "id": "mh_020",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "mh_021",
+    "grounding_score": 0.7333333333333333,
+    "ragas_faithfulness_score": 0.3333333333333333,
+    "diff": 0.39999999999999997
+  },
+  {
+    "id": "mh_022",
+    "grounding_score": 1.0,
+    "ragas_faithfulness_score": 1.0,
+    "diff": 0.0
+  },
+  {
+    "id": "mh_023",
+    "grounding_score": 0.5,
+    "ragas_faithfulness_score": 0.8571428571428571,
+    "diff": 0.3571428571428571
+  },
+  {
+    "id": "mh_024",
+    "grounding_score": 0.9,
+    "ragas_faithfulness_score": null,
+    "diff": null
+  },
+  {
+    "id": "mh_025",
+    "grounding_score": 0.8571428571428571,
+    "ragas_faithfulness_score": 0.6666666666666666,
+    "diff": 0.19047619047619047
+  }
+]
