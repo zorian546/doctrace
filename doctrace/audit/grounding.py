@@ -20,7 +20,9 @@ def is_abstention(answer: str) -> bool:
     Looks for a short stable phrase rather than demanding the whole sentence, so
     small wording drift does not hide a refusal.
     """
-    return ABSTAIN_MARKER in answer.lower()
+    # models often emit a typographic apostrophe, which would defeat the match
+    normalized = answer.lower().replace("’", chr(39)).replace("‘", chr(39))
+    return ABSTAIN_MARKER in normalized
 
 
 def split_into_claims(answer: str) -> list[str]:

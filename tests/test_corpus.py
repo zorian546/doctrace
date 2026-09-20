@@ -4,12 +4,20 @@ Sanity checks for the corpus fetcher and splitter. Run before committing.
 Run with:  python -m pytest tests/test_corpus.py -v
 """
 
+import subprocess
+
+import pytest
+
 from doctrace.corpus.fetcher import pull_docs, read_docs
 from doctrace.corpus.splitter import split_by_headings, split_fixed_window
 
 
 def _get_docs():
-    pull_docs()
+    # these tests need the real docs; skip (do not fail) when the clone is impossible
+    try:
+        pull_docs()
+    except (subprocess.CalledProcessError, FileNotFoundError, OSError):
+        pytest.skip("could not fetch the FastAPI docs (offline, or git missing)")
     return read_docs()
 
 

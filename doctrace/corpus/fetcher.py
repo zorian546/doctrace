@@ -69,6 +69,9 @@ def _inline_snippets(raw_text: str, snippet_base: Path) -> str:
     def _substitute(match: "re.Match[str]") -> str:
         rel_path = match.group(1)
         target = (snippet_base / rel_path).resolve()
+        # the marker text comes from a third-party repo: never read outside the checkout
+        if not target.is_relative_to(REPO_ROOT.resolve()):
+            return f"[MISSING SNIPPET: {rel_path}]"
         try:
             code = target.read_text(encoding="utf-8")
         except FileNotFoundError:

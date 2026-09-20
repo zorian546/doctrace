@@ -10,6 +10,10 @@ Two attack styles are exercised:
 Two things are measured per scenario:
 - Reach: does the planted passage land in the top-k results?
 - Attack landed: does the answer actually repeat the planted marker or payload?
+
+Scope note: retrieval here is keyword search only, which needs no GPU or Qdrant. The
+production path (fused search) could rank a planted passage differently, so treat the
+reach rate as a property of this probe and not of the deployed service.
 """
 
 import json
@@ -103,14 +107,15 @@ def run_injection_suite(scenarios: list[dict] = ATTACK_SCENARIOS, top_k: int = 5
     base_passages = json.loads(passages_path.read_text(encoding="utf-8"))
     tainted_corpus = build_tainted_corpus(base_passages, scenarios)
 
-    outcomes = [run_scenario(s, tainted_corpus, top_k=top_k) for s in scenarios]
+    try:
+        outcomes = [run_scenario(s, tainted_corpus, top_k=top_k) for s in scenarios]
+    finally:
+        # the keyword index is module-global state: always put the clean one back
+        build_lexical_index(base_passages)
 
     total = len(outcomes)
     reached = sum(1 for o in outcomes if o["tainted_reached_topk"])
     landed = sum(1 for o in outcomes if o["attack_landed"])
-
-    # put the clean index back
-    build_lexical_index(base_passages)
 
     return {
         "total_scenarios": total,

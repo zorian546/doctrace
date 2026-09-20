@@ -20,6 +20,7 @@ import time
 
 from sentence_transformers import CrossEncoder
 
+from doctrace.config import get_device
 from doctrace.search.lexical import lexical_search
 from doctrace.search.semantic import semantic_search
 
@@ -43,7 +44,7 @@ def _load_cross_encoder() -> CrossEncoder:
         )
         if tuned_usable:
             print(f"Loading tuned cross-encoder from {_TUNED_RERANKER_DIR}")
-            _cross_encoder = CrossEncoder(_TUNED_RERANKER_DIR, device="cuda")
+            _cross_encoder = CrossEncoder(_TUNED_RERANKER_DIR, device=get_device())
         else:
             if os.path.isdir(_TUNED_RERANKER_DIR):
                 # a Git LFS pointer stub is only a few hundred bytes
@@ -55,7 +56,7 @@ def _load_cross_encoder() -> CrossEncoder:
                 print(
                     f"No tuned reranker at {_TUNED_RERANKER_DIR} -- using stock {_STOCK_RERANKER}"
                 )
-            _cross_encoder = CrossEncoder(_STOCK_RERANKER, device="cuda")
+            _cross_encoder = CrossEncoder(_STOCK_RERANKER, device=get_device())
     return _cross_encoder
 
 
@@ -87,7 +88,7 @@ def _minmax(values: list[float]) -> list[float]:
 
 
 def rescore(query: str, candidates: list[dict], top_k: int = 5,
-            rerank_weight: float | None = 0.5) -> list[dict]:
+            rerank_weight: float | None = 0.7) -> list[dict]:
     """Cross-encoder rescoring of a candidate pool (never the whole corpus, that
     would be far too slow).
 

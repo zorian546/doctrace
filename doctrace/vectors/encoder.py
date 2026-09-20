@@ -6,6 +6,8 @@ One place to turn document text or a user question into a vector.
 
 from sentence_transformers import SentenceTransformer
 
+from doctrace.config import get_device
+
 _MODEL_NAME = "BAAI/bge-m3"
 _model: SentenceTransformer | None = None
 
@@ -13,7 +15,7 @@ _model: SentenceTransformer | None = None
 def _get_model() -> SentenceTransformer:
     global _model
     if _model is None:
-        _model = SentenceTransformer(_MODEL_NAME, device="cuda")
+        _model = SentenceTransformer(_MODEL_NAME, device=get_device())
     return _model
 
 
@@ -39,4 +41,5 @@ def release_gpu() -> None:
     global _model
     import torch
     _model = None
-    torch.cuda.empty_cache()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()

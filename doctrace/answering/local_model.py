@@ -14,6 +14,8 @@ Setup notes:
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+from doctrace.config import get_device
+
 _MODEL_NAME = "Qwen/Qwen2.5-3B-Instruct"
 _model = None
 _tokenizer = None
@@ -27,7 +29,7 @@ def _load():
         _model = AutoModelForCausalLM.from_pretrained(
             _MODEL_NAME,
             torch_dtype=torch.bfloat16,
-            device_map="cuda",
+            device_map=get_device(),
         )
         print("Model loaded.")
     return _model, _tokenizer

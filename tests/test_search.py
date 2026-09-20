@@ -47,3 +47,43 @@ def test_min_max_normalize():
     assert _minmax([]) == []
     assert _minmax([5.0]) == [0.5]
     assert _minmax([10.0, 20.0, 30.0]) == [0.0, 0.5, 1.0]
+
+
+class _FakeCrossEncoder:
+    """Scores a candidate by the number in its text, so the ordering is predictable."""
+
+    def predict(self, pairs):
+        return [float(text) for _, text in pairs]
+
+
+def _candidates():
+    # fusion scores favour "c" and "b"; the cross-encoder favours "a"
+    return [
+        {"id": 1, "text": "9", "fusion_score": 0.010},
+        {"id": 2, "text": "5", "fusion_score": 0.020},
+        {"id": 3, "text": "1", "fusion_score": 0.030},
+    ]
+
+
+def test_rescore_weight_one_follows_the_cross_encoder(monkeypatch):
+    monkeypatch.setattr("doctrace.search.fusion._load_cross_encoder", lambda: _FakeCrossEncoder())
+    out = rescore("q", _candidates(), top_k=3, rerank_weight=1.0)
+    assert [c["id"] for c in out] == [1, 2, 3]
+
+
+def test_rescore_weight_zero_follows_the_fusion_score(monkeypatch):
+    monkeypatch.setattr("doctrace.search.fusion._load_cross_encoder", lambda: _FakeCrossEncoder())
+    out = rescore("q", _candidates(), top_k=3, rerank_weight=0.0)
+    assert [c["id"] for c in out] == [3, 2, 1]
+
+
+def test_rescore_blend_is_between_the_extremes_and_respects_top_k(monkeypatch):
+    monkeypatch.setattr("doctrace.search.fusion._load_cross_encoder", lambda: _FakeCrossEncoder())
+    out = rescore("q", _candidates(), top_k=2, rerank_weight=0.5)
+    assert len(out) == 2
+    assert all(0.0 <= c["blended_score"] <= 1.0 for c in out)
+    assert out[0]["blended_score"] >= out[1]["blended_score"]
+
+
+def test_rescore_empty_pool():
+    assert rescore("q", []) == []

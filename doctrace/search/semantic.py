@@ -22,10 +22,13 @@ _client: QdrantClient | None = None
 def _get_client() -> QdrantClient:
     global _client
     if _client is None:
+        url = os.getenv("QDRANT_URL")
+        if not url:
+            raise RuntimeError("QDRANT_URL is not set. Copy .env.example to .env and fill it in.")
         _client = QdrantClient(
-            url=os.getenv("QDRANT_URL"),
+            url=url,
             api_key=os.getenv("QDRANT_API_KEY"),
-            https=True,
+            # follow the URL scheme, so a local http:// instance works as well as a cloud one
             timeout=60,  # the free tier can stall on big requests
         )
     return _client
