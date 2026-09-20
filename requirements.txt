@@ -1,0 +1,54 @@
+# Corpus and configuration
+python-dotenv
+
+# Vector store
+qdrant-client
+
+# Search and reranking
+rank-bm25
+sentence-transformers  # also provides the cross-encoder
+
+# doctrace/answering/local_model.py (Qwen2.5-3B-Instruct) imports transformers
+# directly, so it is pinned here rather than left to whatever version
+# sentence-transformers happens to pull in.
+# torch is deliberately absent: this project needs a PyTorch NIGHTLY cu128 build for
+# Blackwell/sm_120 GPUs, which the default PyPI index does not carry. The Dockerfile
+# installs it as a separate step; a local (non-Docker) setup should run the same command.
+transformers==5.5.0
+# local_model.py loads with device_map="cuda", which transformers only allows when
+# `accelerate` is installed. It was missing until a clean Docker build exposed it;
+# on a dev machine another package had been pulling it in silently (see ENGINEERING_NOTES.md,
+# Bugs Found & Fixed).
+accelerate==1.14.0
+
+# Evaluation
+# ragas is pinned on purpose. Unpinned, a clean install resolves 0.4.3, which crashes
+# at import: `from ragas.llms.base import BaseRagasLLM` (used by
+# doctrace/audit/ragas_bridge.py) raises ModuleNotFoundError for
+# langchain_community.chat_models.vertexai. That was reproduced in a real container
+# build, not only locally. LocalRagasJudge in ragas_bridge.py also targets the 0.1.21
+# BaseRagasLLM interface (abstract generate_text/agenerate_text), which 0.4.3 never
+# exposes because of the crash. Before bumping this, confirm scripts/bench_ragas.py
+# runs end to end; a clean `import ragas` is not enough.
+ragas==0.1.21
+
+# Versions taken from `pip show` inside a container built against ragas==0.1.21
+# (never against 0.4.3, which does not install cleanly). Pinned so a later install
+# does not drift: ragas 0.1.21's own dependency ranges are wide.
+pydantic==2.13.4
+langchain-core==0.2.43
+datasets==5.0.1
+numpy==1.26.4
+
+# Serving
+# fastapi, starlette and streamlit are pinned as a set. The older fastapi 0.115.0
+# was built for starlette<0.39, while streamlit 1.59.2 needs starlette>=0.40, so the
+# two could not be installed together. fastapi 0.141.1 (built for starlette>=0.46)
+# resolves it. This exact trio was run end to end, not just "latest".
+fastapi==0.141.1
+starlette==1.6.0
+uvicorn
+streamlit==1.59.2
+
+# Tests
+pytest
