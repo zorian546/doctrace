@@ -69,15 +69,15 @@ def stage_generation(gold_pairs: list[dict], retrieval_stash: dict) -> None:
         if pair["category"] == "no_answer":
             row["correctly_refused"] = is_abstention(answer)
         else:
-            print("    scoring faithfulness...")
+            print("    scoring groundedness...")
             faith = grounding_score(answer, retrieved)
-            row["faithfulness_score"] = faith["score"]
+            row["grounding_score"] = faith["score"]
             row["abstained"] = faith["abstained"]
             row["claims"] = faith["claims"]
             if faith["abstained"]:
                 print(f"    WARNING: {pair['id']} unexpectedly refused")
             else:
-                print(f"    faithfulness: {faith['score']:.2f} ({len(faith['claims'])} claims)")
+                print(f"    grounding score: {faith['score']:.2f} ({len(faith['claims'])} claims)")
 
         results_by_id[pair["id"]] = row
         _save_dict_as_list(REPORT_PATH, results_by_id)
@@ -85,10 +85,10 @@ def stage_generation(gold_pairs: list[dict], retrieval_stash: dict) -> None:
     results = list(results_by_id.values())
     for cat in ("single_hop", "multi_hop"):
         rows = [r for r in results if r["category"] == cat and not r.get("abstained")]
-        scores = [r["faithfulness_score"] for r in rows]
+        scores = [r["grounding_score"] for r in rows]
         avg = sum(scores) / len(scores) if scores else 0.0
         refused = sum(1 for r in results if r["category"] == cat and r.get("abstained"))
-        print(f"\n{cat}: avg faithfulness = {avg:.3f} (n={len(rows)}, {refused} unexpectedly refused)")
+        print(f"\n{cat}: mean grounding score = {avg:.3f} (n={len(rows)}, {refused} unexpectedly refused)")
 
     no_answer_rows = [r for r in results if r["category"] == "no_answer"]
     refusal_accuracy = sum(r["correctly_refused"] for r in no_answer_rows) / len(no_answer_rows)

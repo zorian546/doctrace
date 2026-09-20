@@ -5,7 +5,7 @@
       "question": "How do you declare that a path parameter should be an integer in FastAPI?",
       "answer": "By adding a standard Python type annotation to the function parameter, e.g. `item_id: int` in the path operation function -- FastAPI uses this annotation to parse and validate the value.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/path-params.md#path-parameters-with-types"
       ]
     },
@@ -14,7 +14,7 @@
       "question": "How do you declare a path parameter that should be allowed to contain a full file path, like `home/johndoe/myfile.txt`?",
       "answer": "Use the `:path` convertor from Starlette, e.g. a route like `/files/{file_path:path}` -- the `:path` part tells FastAPI the parameter can contain slashes as a full path, not just a single path segment.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/path-params.md#path-convertor"
       ]
     },
@@ -23,7 +23,7 @@
       "question": "How do you set a maximum length of 50 characters on an optional query parameter `q`?",
       "answer": "Wrap the type in `Annotated` and add `Query(max_length=50)`, e.g. `q: Annotated[str | None, Query(max_length=50)] = None`.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/query-params-str-validations.md#add-query-to-annotated-in-the-q-parameter"
       ]
     },
@@ -32,7 +32,7 @@
       "question": "How do you declare a cookie parameter in a FastAPI path operation function?",
       "answer": "Import `Cookie` from fastapi and declare the parameter the same way as `Query` or `Path`, e.g. `ads_id: Annotated[str | None, Cookie()] = None`.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/cookie-params.md#import-cookie"
       ]
     },
@@ -41,7 +41,7 @@
       "question": "What method do you call on a `BackgroundTasks` object to schedule a task to run after the response is returned?",
       "answer": "`.add_task()` -- you pass it your task function (and any parameters that function needs) inside the path operation function.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/background-tasks.md#add-the-background-task"
       ]
     },
@@ -50,7 +50,7 @@
       "question": "What class do you use to enable CORS in a FastAPI application?",
       "answer": "`CORSMiddleware` -- you import it, define a list of allowed origins, and add it as middleware to the FastAPI application.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/cors.md#use-corsmiddleware"
       ]
     },
@@ -59,7 +59,7 @@
       "question": "In FastAPI, do you raise or return an `HTTPException` to report an error to the client?",
       "answer": "You `raise` it, not `return` it -- `HTTPException` is a normal Python exception with additional data relevant to APIs, so it follows Python's normal exception-raising behavior.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/handling-errors.md#raise-an-httpexception-in-your-code"
       ]
     },
@@ -68,7 +68,7 @@
       "question": "What class do you use to serve a directory of static files automatically in FastAPI?",
       "answer": "`StaticFiles`, imported from `fastapi.staticfiles` and mounted at a specific path, e.g. `app.mount(\"/static\", StaticFiles(directory=\"static\"), name=\"static\")`.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/static-files.md#use-staticfiles"
       ]
     },
@@ -77,7 +77,7 @@
       "question": "What underlying library is FastAPI's `TestClient` built on?",
       "answer": "HTTPX -- which itself is designed based on the Requests library, making it familiar to use.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/testing.md#testing"
       ]
     },
@@ -86,7 +86,7 @@
       "question": "What function does FastAPI provide to convert a Pydantic model (or other Python data type) into something JSON-compatible, such as before storing it in a database?",
       "answer": "`jsonable_encoder`.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/encoder.md#using-the-jsonable-encoder"
       ]
     },
@@ -95,7 +95,7 @@
       "question": "In the OAuth2-with-JWT tutorial, what happens when `get_current_user` receives an invalid token, and what general FastAPI mechanism is that behavior actually built on?",
       "answer": "The security tutorial states that if the JWT token is invalid, the dependency returns an HTTP error right away. That mechanism is FastAPI's general error-handling approach described in the Handling Errors guide: you raise an `HTTPException` (a normal Python exception with HTTP-relevant data) rather than returning it, and FastAPI converts that into the appropriate HTTP error response.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/security/oauth2-jwt.md#update-the-dependencies",
         "tutorial/handling-errors.md#use-httpexception"
       ]
@@ -105,7 +105,7 @@
       "question": "Do FastAPI's lifespan startup/shutdown events run for sub-applications mounted with `app.mount()`, and what is the currently recommended way to define startup/shutdown logic in the first place?",
       "answer": "No -- lifespan events (startup and shutdown) only execute for the main application, not for sub-applications mounted separately. The recommended way to define this logic is the `lifespan` parameter of the `FastAPI` app, using an async context manager (a function decorated with `@asynccontextmanager` that uses `yield`) -- the older `@app.on_event(\"startup\")` / `@app.on_event(\"shutdown\")` decorators are deprecated in favor of this.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/events.md#sub-applications",
         "advanced/events.md#lifespan",
         "advanced/events.md#alternative-events-deprecated"
@@ -116,7 +116,7 @@
       "question": "If you put `Query()` inside `Annotated` for a query parameter, can you still set that parameter's default value using `Query(default=...)`, and why is using `Annotated` recommended over the older style regardless?",
       "answer": "No -- when `Query` is used inside `Annotated`, you cannot use `Query`'s own `default` parameter; instead you set the actual default value of the function parameter itself (e.g. `= None`), otherwise it would be inconsistent with how Python parameter defaults normally work. `Annotated` is still recommended over the older style (putting `Query(...)` directly as the parameter's default value) because the function parameter's default stays the actual, intuitive default -- among other tooling/editor-support benefits described in the docs.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/query-params-str-validations.md#query-as-the-default-value-or-in-annotated",
         "tutorial/query-params-str-validations.md#advantages-of-annotated"
       ]
@@ -126,7 +126,7 @@
       "question": "Does FastAPI support arbitrarily deep chains of sub-dependencies, and if a chain of dependencies all use `yield`, does FastAPI guarantee their cleanup ('exit') code runs in a defined order?",
       "answer": "Yes to both. FastAPI's dependency injection system allows dependencies to have sub-dependencies that can be as deep as needed -- described as allowing arbitrarily deeply nested dependency 'graphs' (trees). Separately, when dependencies with `yield` are chained as sub-dependencies, FastAPI makes sure the exit/cleanup code in each one runs in the correct order.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/dependencies/sub-dependencies.md#recap",
         "tutorial/dependencies/dependencies-with-yield.md#sub-dependencies-with-yield"
       ]
@@ -136,42 +136,42 @@
       "question": "How do I connect a FastAPI application to a MongoDB database using the Motor driver?",
       "answer": "Not covered in this corpus. MongoDB's `MotorClient` is mentioned exactly once, only in passing, as an example trigger for a `RuntimeError: Task attached to a different loop` issue in the async-testing troubleshooting notes -- there is no actual MongoDB/Motor integration guide in the tutorial or advanced sections.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "na_002",
       "question": "How do I build a GraphQL API with FastAPI?",
       "answer": "Not covered in this corpus. GraphQL is mentioned exactly once, only as a passing example (that GraphQL APIs typically use only POST operations) inside the First Steps tutorial's discussion of path operation decorators -- there is no guide for actually building a GraphQL API with FastAPI.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "na_003",
       "question": "How do I configure Celery with Redis as the message broker for background task processing in FastAPI?",
       "answer": "Not covered in this corpus. Celery and Redis are each mentioned only in passing, as examples of 'bigger tools' one might reach for instead of FastAPI's built-in `BackgroundTasks` when tasks need to run across multiple processes/servers -- no actual configuration or integration steps are given.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "na_004",
       "question": "How do I containerize a FastAPI application with Docker?",
       "answer": "Not covered in this corpus. Docker is not mentioned anywhere in the tutorial or advanced sections of this corpus.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "na_005",
       "question": "How do I implement rate limiting on a FastAPI endpoint?",
       "answer": "Not covered in this corpus. Rate limiting is not mentioned anywhere in the tutorial or advanced sections of this corpus.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "sh_011",
       "question": "What Pydantic class do you inherit from to declare a request body model in FastAPI?",
       "answer": "`BaseModel`, imported from `pydantic`. You declare a class that inherits from it, with standard Python types for the attributes, then use that class as a type annotation on a path operation function parameter.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/body.md#import-pydantics-basemodel",
         "tutorial/body.md#declare-it-as-a-parameter"
       ]
@@ -181,7 +181,7 @@
       "question": "Does FastAPI support arbitrarily deeply nested Pydantic models in a request body?",
       "answer": "Yes -- with FastAPI you can define, validate, document, and use arbitrarily deeply nested models, thanks to Pydantic.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/body-nested-models.md#body-nested-models",
         "tutorial/body-nested-models.md#deeply-nested-models"
       ]
@@ -191,7 +191,7 @@
       "question": "If you name a header parameter's Python variable with underscores, does FastAPI still match it correctly to the actual HTTP header, which conventionally uses hyphens?",
       "answer": "Yes -- `Header` has extra functionality on top of `Path`/`Query`/`Cookie` specifically to handle this: since most standard HTTP headers use hyphens (which aren't valid in Python variable names), FastAPI automatically converts underscores in the parameter name for you.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/header-params.md#automatic-conversion"
       ]
     },
@@ -200,7 +200,7 @@
       "question": "What two attributes does FastAPI's `UploadFile` object expose for an uploaded file?",
       "answer": "`filename` (a `str` with the original uploaded file name, e.g. `myimage.jpg`) and `content_type` (a `str` with the MIME type, e.g. `image/jpeg`).",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/request-files.md#uploadfile"
       ]
     },
@@ -209,7 +209,7 @@
       "question": "What library does the FastAPI SQL databases tutorial use as its example ORM/database toolkit?",
       "answer": "SQLModel -- built to be compatible with both Pydantic and SQLAlchemy, so the same model classes can double as Pydantic models and database table models.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/sql-databases.md#sql-relational-databases"
       ]
     },
@@ -218,7 +218,7 @@
       "question": "What class do you use to group related path operations into a separate module/file, apart from the main `FastAPI` app instance?",
       "answer": "`APIRouter` -- you import it, create an instance the same way you would `FastAPI`, and declare path operations on it the same way as on the main app.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/bigger-applications.md#apirouter"
       ]
     },
@@ -227,7 +227,7 @@
       "question": "In the Settings and Environment Variables tutorial, what does decorating the settings-reading function with `@lru_cache` actually accomplish?",
       "answer": "It makes the function return the same `Settings` object every time it's called, instead of re-running the (comparatively slow) code to read the file/environment again on each call -- so the settings are computed once and reused.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/settings.md#lru-cache-technical-details"
       ]
     },
@@ -236,7 +236,7 @@
       "question": "What Python standard-library function does the HTTP Basic Auth example use to compare the provided username/password against the correct ones, specifically to avoid timing attacks?",
       "answer": "`secrets.compare_digest()` -- it takes the same amount of time to compare two strings regardless of how many characters match, unlike a naive `==` comparison, which prevents attackers from inferring correct characters one at a time by measuring response time.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/security/http-basic-auth.md#fix-it-with-secrets-compare-digest"
       ]
     },
@@ -245,7 +245,7 @@
       "question": "What exception does FastAPI raise when a WebSocket connection is closed while you're awaiting `websocket.receive_text()`?",
       "answer": "`WebSocketDisconnect`.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/websockets.md#handling-disconnections-and-multiple-clients"
       ]
     },
@@ -254,7 +254,7 @@
       "question": "Which two FastAPI parameter types do you use together to receive both file uploads and form fields in the same request?",
       "answer": "`File` and `Form`.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/request-forms-and-files.md#request-forms-and-files"
       ]
     },
@@ -263,7 +263,7 @@
       "question": "In the SQL databases tutorial, why doesn't the `HeroPublic` model expose the `secret_name` field to API clients, and what general FastAPI mechanism does this rely on?",
       "answer": "`HeroPublic` is deliberately defined with only the fields from `HeroBase` (name, age), not the extra `secret_name` field that only the actual table model `Hero` has -- so it's structurally impossible for it to include that field. This is used together with FastAPI's `response_model` mechanism (declared per path operation), which the general Response Model docs describe as being especially useful to ensure private data is filtered out of what's actually sent to the client.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/sql-databases.md#heropublic-the-public-data-model",
         "tutorial/response-model.md#recap"
       ]
@@ -273,7 +273,7 @@
       "question": "Can you add dependencies that apply to the entire FastAPI application, and how does that relate to the router-level dependencies used when structuring a bigger application into multiple files?",
       "answer": "Yes -- you can add dependencies to the whole `FastAPI` app, similar to how you can add them to individual path operation decorators. The Global Dependencies docs note this connects to how bigger applications are structured (per the Bigger Applications - Multiple Files guide): dependencies can also be declared at the `APIRouter` level so they apply to every path operation included through that router, in addition to (or instead of) truly global, app-wide dependencies.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/dependencies/global-dependencies.md#global-dependencies",
         "tutorial/dependencies/global-dependencies.md#dependencies-for-groups-of-path-operations",
         "tutorial/bigger-applications.md#apirouter"
@@ -284,7 +284,7 @@
       "question": "How would you provide a different settings object during tests, and what tool do you actually use to run HTTP requests against your FastAPI app during those tests?",
       "answer": "By creating a dependency override for the settings-providing dependency (e.g. `get_settings`) -- FastAPI's dependency system lets you swap it out specifically for tests. Requests against the app during those tests are made using `TestClient`, which is built on HTTPX.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/settings.md#settings-and-testing",
         "tutorial/testing.md#testing"
       ]
@@ -294,7 +294,7 @@
       "question": "Do FastAPI's `Depends`-based dependencies work inside WebSocket endpoints the same way they do in regular HTTP path operations?",
       "answer": "Yes -- inside WebSocket endpoints you can import and use `Depends` (along with `Security`, `Cookie`, `Header`, `Path`, `Query`), and they work the same way as they do for other FastAPI endpoints/path operations.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/websockets.md#using-depends-and-others",
         "tutorial/dependencies/index.md#dependencies"
       ]
@@ -304,7 +304,7 @@
       "question": "In the HTTP Basic Auth example, what status code and header does the `HTTPException` get raised with when credentials are incorrect, and does FastAPI's general error-handling system support adding custom headers to an `HTTPException` like that?",
       "answer": "Status code 401 (the same code returned when no credentials are provided at all), with a `WWW-Authenticate` header added so the browser shows its native login prompt. Yes -- FastAPI's general error-handling docs confirm there are situations where it's useful to add custom headers to an HTTP error, and this is exactly one of them.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/security/http-basic-auth.md#return-the-error",
         "tutorial/handling-errors.md#add-custom-headers"
       ]
@@ -314,35 +314,35 @@
       "question": "How do I integrate FastAPI with Apache Kafka for event streaming?",
       "answer": "Not covered in this corpus. Kafka is not mentioned anywhere in the tutorial or advanced sections.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "na_007",
       "question": "What's the recommended way to implement feature flags or A/B testing in a FastAPI application?",
       "answer": "Not covered in this corpus. Neither feature flags nor A/B testing are mentioned anywhere in the tutorial or advanced sections.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "na_008",
       "question": "How do I set up mutual TLS (mTLS) client certificate authentication for a FastAPI application?",
       "answer": "Not covered in this corpus. Mutual TLS and client certificate authentication are not mentioned anywhere in the tutorial or advanced sections -- the security docs cover OAuth2, HTTP Basic Auth, and API keys via headers/cookies/query params, not certificate-based auth.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "na_009",
       "question": "How do I set up a multi-region, active-active deployment of a FastAPI application across AWS and GCP?",
       "answer": "Not covered in this corpus. Multi-region or active-active deployment strategies are not mentioned anywhere in the tutorial or advanced sections. Worth noting: this corpus is scoped to only the tutorial/ and advanced/ doc subsets -- FastAPI's separate deployment/ documentation folder (which covers things like HTTPS, Docker, and cloud deployment more generally) was deliberately excluded from ingestion, so this gap partly reflects corpus scope, not necessarily a real gap in FastAPI's full documentation.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "sh_021",
       "question": "In the Extra Models tutorial, what Pydantic method is used to convert a model instance (like `user_in`) into a plain `dict`?",
       "answer": "`.model_dump()`.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/extra-models.md#pydantics-model-dump"
       ]
     },
@@ -351,7 +351,7 @@
       "question": "How do you mark a path operation as deprecated in FastAPI without actually removing it?",
       "answer": "Pass the parameter `deprecated=True` to the path operation decorator.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/path-operation-configuration.md#deprecate-a-path-operation"
       ]
     },
@@ -360,7 +360,7 @@
       "question": "What decorator do you use to create a custom middleware in FastAPI, and what does the middleware function receive as its parameters?",
       "answer": "`@app.middleware(\"http\")`. The decorated function receives the `request` and a function `call_next` that takes the `request` and returns the `response` (by passing it to the corresponding path operation).",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/middleware.md#create-a-middleware"
       ]
     },
@@ -369,7 +369,7 @@
       "question": "What does `TrustedHostMiddleware` protect a FastAPI application against?",
       "answer": "HTTP Host Header attacks -- it enforces that all incoming requests have a correctly set `Host` header.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/middleware.md#trustedhostmiddleware"
       ]
     },
@@ -378,7 +378,7 @@
       "question": "What response class does FastAPI use by default if you don't declare a `response_model` and don't return a `Response` directly?",
       "answer": "`JSONResponse`.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/custom-response.md#jsonresponse"
       ]
     },
@@ -387,7 +387,7 @@
       "question": "What default HTTP status code does `RedirectResponse` use?",
       "answer": "307 (Temporary Redirect).",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/custom-response.md#redirectresponse"
       ]
     },
@@ -396,7 +396,7 @@
       "question": "What third-party package do you need to install to mount a WSGI application (like Flask or Django) inside a FastAPI app?",
       "answer": "`a2wsgi` (installed with `pip install a2wsgi`), used together with `WSGIMiddleware`.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/wsgi.md#using-wsgimiddleware"
       ]
     },
@@ -405,7 +405,7 @@
       "question": "By default, at what URL path is FastAPI's OpenAPI schema served?",
       "answer": "`/openapi.json` -- configurable via the `openapi_url` parameter.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/metadata.md#openapi-url"
       ]
     },
@@ -414,7 +414,7 @@
       "question": "In FastAPI's OAuth2 scopes example, what type does the `security_scopes` parameter have inside the `get_current_user` dependency, and what property does it expose listing all required scopes?",
       "answer": "It's of type `SecurityScopes`, and it has a `.scopes` property containing a list of all the scopes required by itself and all the dependencies (including path operations) that use it as a sub-dependency.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/security/oauth2-scopes.md#use-the-scopes"
       ]
     },
@@ -423,7 +423,7 @@
       "question": "In the Custom Response docs, if you want maximum JSON serialization performance, what's recommended instead of declaring a custom `response_class` like an `orjson`-based one?",
       "answer": "Use a Response Model (`response_model`) instead -- FastAPI/Pydantic's own serialization is recommended over a custom `orjson` response for performance.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/custom-response.md#orjson-or-response-model"
       ]
     },
@@ -432,7 +432,7 @@
       "question": "If you add multiple middlewares to a FastAPI app, in what order do they actually run relative to each other, and does `CORSMiddleware` (from the main tutorial) follow that same general ordering rule?",
       "answer": "Multiple middlewares (added via `@app.middleware()` or `app.add_middleware()`) form a stack, each wrapping the application -- per the Multiple middleware execution order docs, the last middleware added is the outermost, so it runs first on the way in. `CORSMiddleware` is added the same way as any other middleware (`app.add_middleware(CORSMiddleware, ...)`), so it follows this same general stacking/ordering behavior as any other middleware -- there's no special-cased ordering just for CORS.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/middleware.md#multiple-middleware-execution-order",
         "tutorial/cors.md#use-corsmiddleware"
       ]
@@ -442,7 +442,7 @@
       "question": "In the OAuth2 scopes example, if `get_current_active_user` has `get_current_user` as a sub-dependency, and the scope `\"me\"` is declared at `get_current_active_user`, does the sub-dependency `get_current_user` also require that scope to be verified? And separately, what general FastAPI concept explains why a dependency can have sub-dependencies at all?",
       "answer": "According to the Dependency tree and scopes section, since `get_current_active_user` declares the `\"me\"` scope and has `get_current_user` as a sub-dependency, `get_current_user` will also require that scope (`SecurityScopes` accumulates scopes required by a dependency and all of its dependants). This is only possible because of FastAPI's general dependency injection system, which explicitly supports sub-dependencies -- dependencies can themselves declare further dependencies, forming a dependency tree/graph.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/security/oauth2-scopes.md#dependency-tree-and-scopes",
         "tutorial/dependencies/sub-dependencies.md#recap"
       ]
@@ -452,7 +452,7 @@
       "question": "If you return a `Response` object directly from a path operation instead of a `dict`/Pydantic model, does FastAPI still validate or serialize its contents using your declared `response_model`? And relatedly, what tool would you need to use manually if you wanted to put non-JSON-serializable data (like a `datetime`) into that raw `Response`?",
       "answer": "No -- per the Return a Response Directly docs, when you return a `Response` (or subclass) directly, FastAPI passes it through as-is, without any data conversion, validation, or documentation based on `response_model`. Because of that, if you need to include non-JSON-serializable data like a `datetime` in that raw response's content, you have to convert it yourself first -- typically using `jsonable_encoder`, the same tool used elsewhere in the docs for converting data before storage/serialization.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/response-directly.md#return-a-response",
         "advanced/response-directly.md#using-the-jsonable-encoder-in-a-response",
         "tutorial/encoder.md#using-the-jsonable-encoder"
@@ -463,7 +463,7 @@
       "question": "The Extra Models tutorial creates a `UserInDB` model by unpacking `user_in.model_dump()` and adding a `hashed_password`. Why is this pattern useful, and how does it relate to the general 'Reduce duplication' principle described in the same tutorial?",
       "answer": "This pattern (`UserInDB(**user_in.model_dump(), hashed_password=hashed_password)`) lets you build a new, different Pydantic model from an existing one's data plus extra fields, without manually repeating every shared field. This directly demonstrates the tutorial's 'Reduce duplication' principle: rather than declaring the same overlapping fields (like `email`, `full_name`) separately on every related model (`UserIn`, `UserOut`, `UserInDB`), you unpack and extend data between them, reducing the code duplication that the docs say increases the chances of bugs and security issues.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/extra-models.md#unpacking-a-dict-and-extra-keywords",
         "tutorial/extra-models.md#reduce-duplication"
       ]
@@ -473,7 +473,7 @@
       "question": "If you want to both override the response class used by a path operation (e.g. to `HTMLResponse`) AND have it correctly documented in the OpenAPI schema, is returning a `Response` object directly (as covered in 'Return a Response Directly') sufficient on its own?",
       "answer": "Not fully -- per the Custom Response docs' 'Document in OpenAPI and override Response' section, if you want the response documented correctly in OpenAPI while overriding the media type, you should use the `response_class` parameter on the path operation decorator (e.g. `response_class=HTMLResponse`) in addition to returning the response. Returning a `Response` directly (per 'Return a Response Directly') works to override the output, but that page's own 'Notes' section states that data returned this way is not validated, converted, or documented automatically -- so `response_class` is the piece needed for correct OpenAPI documentation.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/custom-response.md#document-in-openapi-and-override-response",
         "advanced/response-directly.md#notes"
       ]
@@ -483,7 +483,7 @@
       "question": "The Metadata tutorial explains that the order of `tags_metadata` dictionaries controls the order tags appear in the docs UI. Separately, how do you actually assign a given path operation to one of those tags in the first place?",
       "answer": "You pass the `tags` parameter (a list of strings, commonly just one) to the path operation decorator -- or to an `APIRouter`, to apply it to all path operations included through that router. The tag name used there must match a `name` key in one of the dictionaries passed to `openapi_tags`, which is what determines both the tag's description and (via dictionary order) its position in the docs UI.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/path-operation-configuration.md#tags",
         "tutorial/metadata.md#order-of-tags",
         "tutorial/metadata.md#use-your-tags"
@@ -494,21 +494,21 @@
       "question": "How do I set up FastAPI to publish messages to an AWS SQS queue after a request completes?",
       "answer": "Not covered in this corpus. AWS SQS is not mentioned anywhere in the tutorial or advanced sections -- the closest built-in concept is `BackgroundTasks` for post-response work, but no SQS or general message-queue integration is documented.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "na_011",
       "question": "How do I add OpenTelemetry distributed tracing to a FastAPI application?",
       "answer": "Not covered in this corpus. OpenTelemetry and distributed tracing are not mentioned anywhere in the tutorial or advanced sections.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "sh_031",
       "question": "What Python standard-library type would you use to declare a path operation parameter that should accept a UUID value?",
       "answer": "`UUID`, from the `uuid` module -- FastAPI recognizes it as a data type and represents it as a string in requests/responses, while giving you an actual Python `UUID` object inside your function.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/extra-data-types.md#other-data-types"
       ]
     },
@@ -517,7 +517,7 @@
       "question": "By default, does FastAPI include additional status codes (returned by directly returning a `Response`/`JSONResponse` with a custom status code) in the generated OpenAPI schema?",
       "answer": "No -- if you return additional status codes and responses directly, they won't be included in the OpenAPI schema, because FastAPI doesn't have a way to know beforehand what you're going to return. You can document this behavior manually if you want, using the appropriate OpenAPI tools.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/additional-status-codes.md#openapi-and-api-docs"
       ]
     },
@@ -526,7 +526,7 @@
       "question": "In FastAPI's OAuth2 password-flow example, what does the `OAuth2PasswordRequestForm` dependency give you access to that's different from a raw `scope` string sent by the client?",
       "answer": "Even though the client sends a single `scope` form field containing a space-separated string of scopes, the `OAuth2PasswordRequestForm` instance exposes it as a `scopes` attribute -- already split into an actual `list` of the individual scope strings.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/security/simple-oauth2.md#use-the-form-data"
       ]
     },
@@ -535,7 +535,7 @@
       "question": "If you add a dependency to a path operation decorator's `dependencies` list (rather than as a function parameter), and that dependency function returns a value, is that return value made available inside the path operation function?",
       "answer": "No -- dependencies declared this way can return values or not, but the values won't be used by the path operation function. You could still reuse a normal dependency that returns something you use elsewhere, and it will still execute (and can still raise exceptions), but its return value is simply discarded in this context.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/dependencies/dependencies-in-path-operation-decorators.md#return-values"
       ]
     },
@@ -544,7 +544,7 @@
       "question": "What attribute do you use on a FastAPI app instance to define OpenAPI webhooks, analogous to how you'd define a normal path operation?",
       "answer": "The `webhooks` attribute, e.g. `@app.webhooks.post(...)` -- used the same way you'd define a regular path operation, but to document requests your app will send to external users' apps, rather than requests your app receives.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/openapi-webhooks.md#an-app-with-webhooks"
       ]
     },
@@ -553,7 +553,7 @@
       "question": "In the OpenAPI Callbacks docs, what class do you use to build a set of callback path operations that document how an external API should look, before attaching them to the main path operation?",
       "answer": "`APIRouter` -- you create a separate `APIRouter` instance specifically to hold the callback path operation(s), then pass it to the main path operation decorator's `callbacks` parameter.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/openapi-callbacks.md#create-a-callback-apirouter"
       ]
     },
@@ -562,7 +562,7 @@
       "question": "In the Get Current User tutorial, what Pydantic model type does the `get_current_user` dependency ultimately return?",
       "answer": "A Pydantic `User` model -- the dependency uses a (fake, for tutorial purposes) utility function that takes the token string and returns the corresponding `User` model instance.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/security/get-current-user.md#get-the-user"
       ]
     },
@@ -571,7 +571,7 @@
       "question": "Where in a Pydantic model can you add `examples` so they show up in the generated JSON Schema, according to the Declare Request Example Data docs?",
       "answer": "Two ways: passing `examples` inside `model_config`/`schema_extra` at the model level, or using `Field(examples=[...])` on an individual field.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/schema-extra-example.md#extra-json-schema-data-in-pydantic-models",
         "tutorial/schema-extra-example.md#field-additional-arguments"
       ]
@@ -581,7 +581,7 @@
       "question": "Why does the Simple OAuth2 tutorial recommend hashing passwords before storing them in a database, rather than storing them as plaintext?",
       "answer": "If the database is ever stolen, the thief would only have the hashes, not the actual plaintext passwords -- so they wouldn't be able to reuse those same passwords against other systems the user might have reused them on.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/security/simple-oauth2.md#why-use-password-hashing"
       ]
     },
@@ -590,7 +590,7 @@
       "question": "In the Simple OAuth2 tutorial's login flow, what response is returned to the client if they authenticate with an inactive user?",
       "answer": "An error with the detail message `\"Inactive user\"`, produced by the additional `get_current_active_user` dependency, which checks whether the user returned by `get_current_user` is active before allowing the request through.",
       "category": "single_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/security/simple-oauth2.md#inactive-user",
         "tutorial/security/simple-oauth2.md#update-the-dependencies"
       ]
@@ -600,7 +600,7 @@
       "question": "The 'Dependencies in path operation decorators' docs mention that dependencies with no return value are still useful because they can require things like headers or raise exceptions. How does this relate to the `verify_token`-style pattern, and does this same 'attach a dependency without using its return value' idea extend to whole applications, not just single path operations?",
       "answer": "Yes -- the pattern of a dependency like `verify_token` that just validates a header and raises an `HTTPException` if it's missing/invalid (without needing to return anything used by the path operation) is exactly what the `dependencies` parameter on a path operation decorator is for. The same docs note this same idea extends further: dependencies can also be declared for a whole group of path operations (via `APIRouter`), and -- per Global Dependencies -- even for the entire `FastAPI` application, so every request goes through the same check.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/dependencies/dependencies-in-path-operation-decorators.md#raise-exceptions",
         "tutorial/dependencies/dependencies-in-path-operation-decorators.md#dependencies-for-a-group-of-path-operations",
         "tutorial/dependencies/dependencies-in-path-operation-decorators.md#global-dependencies"
@@ -611,7 +611,7 @@
       "question": "The Get Current User tutorial builds `get_current_user` as a dependency with a sub-dependency on `oauth2_scheme`. The Simple OAuth2 tutorial then adds `get_current_active_user` on top. Combining these: what's the actual dependency chain by the end of the Simple OAuth2 tutorial, from the path operation down to the raw token?",
       "answer": "The path operation depends on `get_current_active_user`, which depends on `get_current_user` (as described in Get Current User), which in turn depends on `oauth2_scheme` to extract the raw bearer token from the request. So the chain is: path operation -> `get_current_active_user` -> `get_current_user` -> `oauth2_scheme`, with the active-user check added on top of the base user-fetching dependency from the prior chapter.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/security/get-current-user.md#create-a-get-current-user-dependency",
         "tutorial/security/simple-oauth2.md#update-the-dependencies"
       ]
@@ -621,7 +621,7 @@
       "question": "If you want to both return an additional (non-default) HTTP status code from a path operation AND have that additional response documented in the OpenAPI schema, is simply returning a `Response`/`JSONResponse` with that status code (as covered in Additional Status Codes) enough on its own?",
       "answer": "No, not fully -- per the Additional Status Codes docs, returning additional status codes/responses directly means they won't automatically appear in the OpenAPI schema, since FastAPI can't know in advance what you'll return that way. To get it documented, you have to explicitly add that information using FastAPI/Starlette's OpenAPI documentation tools -- it isn't inferred automatically the way a normal `response_model`-based response is.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/additional-status-codes.md#additional-status-codes_1",
         "advanced/additional-status-codes.md#openapi-and-api-docs"
       ]
@@ -631,7 +631,7 @@
       "question": "Both 'Declare Request Example Data' and 'OpenAPI Callbacks' involve documenting things FastAPI can't fully infer automatically from your normal code. What's the common underlying reason both features exist, and how does each one solve it differently?",
       "answer": "Both exist because FastAPI's automatic docs, by default, only reflect what it can infer directly from your declared types/models -- it doesn't know about illustrative sample values, or about external requests your API might trigger. 'Declare Request Example Data' solves this for sample values, letting you attach `examples` to models/parameters so the docs UI shows realistic example payloads. 'OpenAPI Callbacks' solves this for a different problem entirely -- documenting a request *your app will send* to an external API -- by letting you write dummy path operations (via a separate `APIRouter`) purely to describe what that external API's endpoint should look like, attached via the `callbacks` parameter.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/schema-extra-example.md#declare-request-example-data",
         "advanced/openapi-callbacks.md#openapi-callbacks"
       ]
@@ -641,7 +641,7 @@
       "question": "OpenAPI Webhooks and OpenAPI Callbacks both involve FastAPI documenting requests your app sends to someone else's API rather than requests it receives. What's the key structural difference in how each one is declared in code?",
       "answer": "Webhooks are declared directly on the main `FastAPI` app instance itself, using its `webhooks` attribute (e.g. `@app.webhooks.post(...)`), the same way you'd declare a normal path operation. Callbacks, by contrast, are declared on a separate `APIRouter` created specifically to hold the callback path operation(s), which is then attached to a specific path operation via that path operation decorator's `callbacks` parameter -- tying the documentation to one particular endpoint rather than the whole app.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/openapi-webhooks.md#an-app-with-webhooks",
         "advanced/openapi-callbacks.md#create-a-callback-apirouter",
         "advanced/openapi-callbacks.md#add-the-callback-router"
@@ -652,35 +652,35 @@
       "question": "How do I use FastAPI's built-in support to connect to a MongoDB database with an ODM like Beanie or ODMantic?",
       "answer": "Not covered in this corpus. Neither Beanie nor ODMantic are mentioned anywhere in the tutorial or advanced sections -- MongoDB itself is mentioned exactly once, only as a troubleshooting aside, not as part of an actual integration guide.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "na_013",
       "question": "How do I configure FastAPI to use gRPC instead of HTTP for a service?",
       "answer": "Not covered in this corpus. gRPC is not mentioned anywhere in the tutorial or advanced sections.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "na_014",
       "question": "How do I set up horizontal pod autoscaling for a FastAPI app running in Kubernetes?",
       "answer": "Not covered in this corpus. Kubernetes, pod autoscaling, and related orchestration concepts are not mentioned anywhere in the tutorial or advanced sections -- and as noted for a similar earlier question, FastAPI's separate deployment/ documentation folder (which might cover infrastructure topics like this) was excluded from this corpus's scope entirely.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "na_015",
       "question": "How do I implement idempotency keys for POST requests in FastAPI to prevent duplicate order creation on client retries?",
       "answer": "Not covered in this corpus. Idempotency keys are not mentioned anywhere in the tutorial or advanced sections.",
       "category": "no_answer",
-      "source_chunks": []
+      "source_passages": []
     },
     {
       "id": "mh_021",
       "question": "The Classes as Dependencies tutorial shows using a class like `CommonQueryParams` directly as a dependency, taking advantage of the fact that instantiating a class uses the same call syntax as calling a function. Separately, Query Parameter Models covers grouping related query parameters into a Pydantic model. Are these describing the same underlying pattern, or two genuinely different approaches to reducing repeated query-parameter declarations?",
       "answer": "They're two different approaches. Classes as Dependencies works because *any* callable (not just functions) can be a dependency -- a class is 'callable' in the sense that instantiating it (`ClassName(...)`) works like calling a function, so `Depends(CommonQueryParams)` runs `CommonQueryParams.__init__` per-request. Query Parameter Models instead relies specifically on Pydantic model declaration and validation (using `Annotated[Model, Query()]`) to group and validate a set of query parameters together, including features like forbidding extra query parameters -- it isn't about exploiting Python's general callable/class-instantiation syntax the way Classes as Dependencies is.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/dependencies/classes-as-dependencies.md#classes-as-dependencies_1",
         "tutorial/query-param-models.md#query-parameters-with-a-pydantic-model"
       ]
@@ -690,7 +690,7 @@
       "question": "Both Header Parameter Models and the plain Header Parameters tutorial mention that FastAPI automatically converts underscores to hyphens. Does the Pydantic-model version of header parameters let you disable that automatic conversion, and if so, does the plain (non-model) version offer the same option?",
       "answer": "Header Parameter Models specifically covers a 'Disable Convert Underscores' option using Pydantic model configuration, letting you turn off the automatic underscore-to-hyphen conversion for that model. The plain Header Parameters tutorial only describes the automatic conversion behavior itself (via the 'Automatic conversion' section) without describing a way to disable it -- so the ability to explicitly turn the behavior off is specific to the Pydantic-model-based approach covered in Header Parameter Models, not something shown for individually-declared header parameters.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "tutorial/header-param-models.md#disable-convert-underscores",
         "tutorial/header-params.md#automatic-conversion"
       ]
@@ -700,7 +700,7 @@
       "question": "If your FastAPI app is deployed behind a proxy that strips a path prefix (using `root_path`), and you're also mounting a sub-application, does the Behind a Proxy documentation say `root_path` handling works normally, or does mounting a sub-application change anything about it?",
       "answer": "It works normally -- the 'Mounting a sub-application' section of Behind a Proxy states that if you need to mount a sub-application while also using a proxy with `root_path` (as described in the general Sub Applications - Mounts docs), you can do it normally, as you would otherwise expect, without special extra handling for the proxy/root_path combination.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/behind-a-proxy.md#mounting-a-sub-application",
         "advanced/events.md#sub-applications"
       ]
@@ -710,7 +710,7 @@
       "question": "The Generating SDKs docs mention that FastAPI uses a unique operation ID for each path operation, partly used to name generated client methods, and that this can be customized. Separately, Path Operation Configuration covers `tags` and other decorator-level metadata. Does customizing operation IDs for cleaner client method names involve the `tags` mechanism at all, or is it a separate configuration path?",
       "answer": "It's related but not the same mechanism. Generating SDKs shows that cleaner client method names come from customizing how the operation's unique ID is generated (via a custom `generate_unique_id_function`), which is a separate configuration path from `tags`. However, the docs also show that when a FastAPI app *does* use tags (as covered generally in Path Operation Configuration), the SDK generator will normally separate the generated client code by tag -- so tags affect how the generated client is organized/grouped, while the custom ID function affects the actual method names within that structure. They're complementary, not the same setting.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/generate-clients.md#custom-generate-unique-id-function",
         "advanced/generate-clients.md#generate-a-typescript-client-with-tags",
         "tutorial/path-operation-configuration.md#tags"
@@ -721,7 +721,7 @@
       "question": "Testing Dependencies with Overrides describes using `app.dependency_overrides` to swap out a dependency during tests, using an example of an external authentication provider. Testing WebSockets shows using `TestClient` in a `with` statement to test a WebSocket connection. If a WebSocket endpoint uses `Depends` for authentication (as covered in the WebSockets docs), would `app.dependency_overrides` still apply when testing it with `TestClient`?",
       "answer": "Yes, in principle -- `app.dependency_overrides` is a general mechanism on the `FastAPI` app itself (a plain `dict` mapping the original dependency to a replacement), not something scoped only to HTTP path operations. Since WebSocket endpoints support `Depends` the same way regular path operations do, and `TestClient` (used the same way for both HTTP and WebSocket testing, per Testing WebSockets) is what actually exercises the app, a dependency override registered on the app would apply regardless of whether the endpoint being tested is an HTTP path operation or a WebSocket endpoint.",
       "category": "multi_hop",
-      "source_chunks": [
+      "source_passages": [
         "advanced/testing-dependencies.md#use-the-app-dependency-overrides-attribute",
         "advanced/testing-websockets.md#testing-websockets",
         "advanced/websockets.md#using-depends-and-others"

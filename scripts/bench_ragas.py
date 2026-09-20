@@ -38,7 +38,7 @@ def main() -> None:
             "question": question,
             "answer": r["answer"],
             "contexts": [c["text"] for c in retrieved],
-            "grounding_score": r["faithfulness_score"],
+            "grounding_score": r["grounding_score"],
         })
 
     print(f"Scoring {len(rows)} pairs with RAGAS faithfulness...", flush=True)

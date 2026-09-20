@@ -1,7 +1,7 @@
 """
 Gold question set: loading, validation, and ground-truth resolution.
 
-Reads gold/gold_pairs.json and converts each pair's `source_chunks` references
+Reads gold/gold_pairs.json and converts each pair's `source_passages` references
 (such as "tutorial/path-params.md#path-parameters-with-types") into real passage
 indices in data/processed/passages.json. Resolution goes through the anchors captured
 during splitting (doctrace/corpus/splitter.py); guessing a slug from the heading
@@ -35,7 +35,7 @@ def build_anchor_index(passages: list[dict]) -> dict[tuple[str, str], int]:
 
 def attach_gold_ids(pairs: list[dict], passages: list[dict] | None = None) -> list[dict]:
     """Add a `ground_truth_ids` list[int] to each pair by resolving its
-    source_chunks references to passage anchors.
+    source_passages references to passage anchors.
 
     no_answer pairs get an empty list since they have no references by design.
     Any unresolvable single_hop/multi_hop reference raises: swallowing it would
@@ -48,7 +48,7 @@ def attach_gold_ids(pairs: list[dict], passages: list[dict] | None = None) -> li
     out = []
     for pair in pairs:
         ids = []
-        for ref in pair["source_chunks"]:
+        for ref in pair["source_passages"]:
             path, anchor = ref.split("#", 1) if "#" in ref else (ref, None)
             if (path, anchor) not in index:
                 raise ValueError(
@@ -62,7 +62,7 @@ def attach_gold_ids(pairs: list[dict], passages: list[dict] | None = None) -> li
 
 def check_gold_pairs(pairs: list[dict]) -> None:
     """Basic integrity checks: non-blank question and answer, known category,
-    unique ids, unique question text, and source_chunks that suit the category
+    unique ids, unique question text, and source_passages that suit the category
     (empty for no_answer, populated otherwise)."""
     categories = {"single_hop", "multi_hop", "no_answer"}
     ids_seen = set()
@@ -81,6 +81,6 @@ def check_gold_pairs(pairs: list[dict]) -> None:
         questions_seen.add(normalized)
 
         if pair["category"] == "no_answer":
-            assert not pair["source_chunks"], f"{pair['id']}: no_answer pair should have empty source_chunks"
+            assert not pair["source_passages"], f"{pair['id']}: no_answer pair should have empty source_passages"
         else:
-            assert pair["source_chunks"], f"{pair['id']}: {pair['category']} pair has empty source_chunks"
+            assert pair["source_passages"], f"{pair['id']}: {pair['category']} pair has empty source_passages"

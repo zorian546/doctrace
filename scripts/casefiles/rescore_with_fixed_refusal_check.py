@@ -33,7 +33,7 @@ def main() -> None:
             if old != robust_refusal and robust_refusal:
                 corrections.append((r["id"], "abstained", old, robust_refusal))
                 r["abstained"] = True
-                r["faithfulness_score"] = None
+                r["grounding_score"] = None
 
     print(f"Corrections made: {len(corrections)}")
     for pid, field, old, new in corrections:
@@ -41,7 +41,7 @@ def main() -> None:
 
     for cat in ("single_hop", "multi_hop"):
         rows = [r for r in results if r["category"] == cat and not r.get("abstained")]
-        scores = [r["faithfulness_score"] for r in rows]
+        scores = [r["grounding_score"] for r in rows]
         avg = sum(scores) / len(scores) if scores else 0.0
         refused = sum(1 for r in results if r["category"] == cat and r.get("abstained"))
         print(f"\n{cat}: avg faithfulness = {avg:.3f} (n={len(rows)}, {refused} unexpectedly refused)")

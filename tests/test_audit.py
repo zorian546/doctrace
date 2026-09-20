@@ -41,13 +41,13 @@ def test_is_abstention():
 
 def test_check_gold_pairs_accepts_valid():
     valid = [
-        {"id": "sh_001", "category": "single_hop", "question": "Q1", "answer": "A1", "source_chunks": ["file.md#anchor"]},
-        {"id": "na_001", "category": "no_answer", "question": "Q2", "answer": "A2", "source_chunks": []},
+        {"id": "sh_001", "category": "single_hop", "question": "Q1", "answer": "A1", "source_passages": ["file.md#anchor"]},
+        {"id": "na_001", "category": "no_answer", "question": "Q2", "answer": "A2", "source_passages": []},
     ]
     check_gold_pairs(valid)  # should not raise
 
 
 def test_check_gold_pairs_rejects_blank():
-    invalid = [{"id": "sh_001", "category": "single_hop", "question": "", "answer": "A1", "source_chunks": ["f.md"]}]
+    invalid = [{"id": "sh_001", "category": "single_hop", "question": "", "answer": "A1", "source_passages": ["f.md"]}]
     with pytest.raises(AssertionError):
         check_gold_pairs(invalid)

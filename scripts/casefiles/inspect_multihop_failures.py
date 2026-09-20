@@ -17,12 +17,12 @@ def main() -> None:
     results = json.loads(open(REPORT_PATH, encoding="utf-8").read())
     multihop = [r for r in results if r["category"] == "multi_hop" and not r.get("abstained")]
 
-    below_perfect = [r for r in multihop if r["faithfulness_score"] < 1.0]
+    below_perfect = [r for r in multihop if r["grounding_score"] < 1.0]
     print(f"{len(below_perfect)}/{len(multihop)} multi_hop pairs scored below 1.0\n")
 
-    for r in sorted(below_perfect, key=lambda x: x["faithfulness_score"]):
+    for r in sorted(below_perfect, key=lambda x: x["grounding_score"]):
         print(f"{'=' * 70}")
-        print(f"{r['id']}  faithfulness={r['faithfulness_score']:.2f}")
+        print(f"{r['id']}  faithfulness={r['grounding_score']:.2f}")
         print(f"{'=' * 70}")
         for c in r["claims"]:
             if not c["supported"]:

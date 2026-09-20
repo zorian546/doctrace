@@ -76,7 +76,7 @@ def score_fixed_window_lexical(docs: list[dict], gold_pairs: list[dict], window_
         
         # Ground truth source paths
         gt_sources = set()
-        for ref in pair["source_chunks"]:
+        for ref in pair["source_passages"]:
             src = ref.split("#")[0]
             gt_sources.add(src)
 

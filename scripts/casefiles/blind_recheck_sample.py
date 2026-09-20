@@ -35,7 +35,7 @@ def main() -> None:
     for i, pair in enumerate(sample, start=1):
         print(f"\n{i}. [{pair['id']}]")
         print(f"   A: {pair['answer']}")
-        print(f"   Source: {pair['source_chunks']}")
+        print(f"   Source: {pair['source_passages']}")
 
 
 if __name__ == "__main__":

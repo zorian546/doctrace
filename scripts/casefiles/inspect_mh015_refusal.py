@@ -16,7 +16,7 @@ def main() -> None:
     p = gold_pairs["mh_015"]
     print("Q:", p["question"])
     print("\nExpected answer:", p["answer"])
-    print("\nExpected source_chunks:", p["source_chunks"])
+    print("\nExpected source_passages:", p["source_passages"])
     print("\nLocal model's actual answer:", r["answer"])
 
 if __name__ == "__main__":
