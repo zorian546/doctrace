@@ -4,17 +4,18 @@ Text encoder: a thin wrapper over BAAI/bge-m3 (1024-d, L2-normalised).
 One place to turn document text or a user question into a vector.
 """
 
-from sentence_transformers import SentenceTransformer
-
 from doctrace.config import get_device
 
 _MODEL_NAME = "BAAI/bge-m3"
-_model: SentenceTransformer | None = None
+_model = None
 
 
-def _get_model() -> SentenceTransformer:
+def _get_model():
+    """Load on first use. sentence_transformers pulls in torch, which costs seconds and
+    a lot of memory, so importing this module stays cheap for callers that never encode."""
     global _model
     if _model is None:
+        from sentence_transformers import SentenceTransformer
         _model = SentenceTransformer(_MODEL_NAME, device=get_device())
     return _model
 

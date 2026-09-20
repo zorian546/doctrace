@@ -5,10 +5,12 @@ Nothing here has a side effect at import time, so tests and scripts can import i
 """
 
 import os
+from functools import lru_cache
 
 _DEFAULT_ORIGINS = "http://localhost:8501,http://127.0.0.1:8501"
 
 
+@lru_cache(maxsize=1)
 def get_device() -> str:
     """'cuda' when a GPU is usable, otherwise 'cpu' (slow, but it works)."""
     try:

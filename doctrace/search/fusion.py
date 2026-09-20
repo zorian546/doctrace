@@ -18,8 +18,6 @@ Stages:
 import os
 import time
 
-from sentence_transformers import CrossEncoder
-
 from doctrace.config import get_device
 from doctrace.search.lexical import lexical_search
 from doctrace.search.semantic import semantic_search
@@ -30,12 +28,14 @@ from doctrace.search.semantic import semantic_search
 # back to the stock model instead of failing.
 _TUNED_RERANKER_DIR = "models/docs-reranker-minilm"
 _STOCK_RERANKER = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-_cross_encoder: CrossEncoder | None = None
+_cross_encoder = None
 
 
-def _load_cross_encoder() -> CrossEncoder:
+def _load_cross_encoder():
+    """Load on first use; see doctrace/vectors/encoder.py for why this is deferred."""
     global _cross_encoder
     if _cross_encoder is None:
+        from sentence_transformers import CrossEncoder
         weight_file = os.path.join(_TUNED_RERANKER_DIR, "model.safetensors")
         tuned_usable = (
             os.path.isdir(_TUNED_RERANKER_DIR)

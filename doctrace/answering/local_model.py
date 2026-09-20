@@ -11,9 +11,6 @@ Setup notes:
   start a JSON array) for structured-output prompts.
 """
 
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
-
 from doctrace.config import get_device
 
 _MODEL_NAME = "Qwen/Qwen2.5-3B-Instruct"
@@ -22,8 +19,11 @@ _tokenizer = None
 
 
 def _load():
+    """Load on first use, so importing this module does not pull in torch."""
     global _model, _tokenizer
     if _model is None:
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
         print(f"Loading {_MODEL_NAME} (first call only, may take a while)...")
         _tokenizer = AutoTokenizer.from_pretrained(_MODEL_NAME)
         _model = AutoModelForCausalLM.from_pretrained(
@@ -44,6 +44,8 @@ def complete(system_prompt: str | None, user_message: str,
     prefill: optional text the reply must start with; it is added back to the
     returned string.
     """
+    import torch
+
     model, tokenizer = _load()
 
     turns = []
