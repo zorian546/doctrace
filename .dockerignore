@@ -1,0 +1,30 @@
+# Version control
+.git/
+.gitignore
+
+# Python
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+
+# Raw docs checkout: rebuilt by scripts/build_index.py and not read at runtime
+# (data/processed/ IS read at runtime, so it stays in)
+data/raw/
+
+# Secrets arrive at runtime through compose's env_file and never go into the image
+.env
+
+# Not needed to serve
+scripts/
+gold/
+tests/
+*.md
+
+# Docker files themselves
+Dockerfile
+compose.yaml
+.dockerignore

@@ -1,0 +1,31 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Raw docs and generated artifacts can be rebuilt with scripts/build_index.py
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/processed/retrieval_report.json
+!data/processed/generation_report.json
+!data/processed/ragas_crosscheck.json
+!data/processed/injection_report.json
+!data/processed/ablation_quick.json
+!data/processed/ablation_grid.json
+!data/processed/reranker_tuning_report.json
+# The service builds its keyword index from passages.json at startup. If the file
+# were untracked, a fresh clone would build an image that boots degraded
+# (see the lifespan hook in doctrace/service/server.py). It is about 1MB, so it is tracked directly.
+!data/processed/passages.json
+
+# Model checkpoints are ignored, except the tuned reranker. It is loaded at runtime
+# by doctrace/search/fusion.py, and its large weight file goes through Git LFS
+# (see .gitattributes).
+models/*
+!models/docs-reranker-minilm/
+checkpoints/
+
+.pytest_cache/
