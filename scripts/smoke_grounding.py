@@ -56,7 +56,7 @@ def main() -> None:
 
     wrong_context = semantic_search("How do I use WebSockets in FastAPI?", top_k=TOP_K)
     result = grounding_score(gen["answer"], wrong_context)
-    print(f"\nScored against UNRELATED context -- expect a LOW score, not 1.0:")
+    print("\nScored against UNRELATED context -- expect a LOW score, not 1.0:")
     if result["abstained"]:
         print("  N/A (no claims extracted)")
     else:

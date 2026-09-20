@@ -21,8 +21,6 @@ from doctrace.audit.goldset import load_gold_pairs, attach_gold_ids, check_gold_
 from doctrace.corpus.splitter import split_by_headings, split_fixed_window
 from doctrace.corpus.fetcher import read_docs
 from doctrace.search.lexical import lexical_search, build_lexical_index
-from doctrace.search.semantic import semantic_search
-from doctrace.search.fusion import fused_search
 
 TOP_K = 5
 REPORT_PATH = Path("data/processed/ablation_grid.json")

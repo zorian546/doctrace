@@ -33,18 +33,17 @@ REPORT_PATH = Path("data/processed/reranker_tuning_report.json")
 SEED = 42
 
 
-def assemble_training_pairs(gold_rows: list[dict], passages: list[dict], hard_negatives_per_query: int = 4) -> tuple[list, list]:
-    """Build positive and hard negative pairs from BM25/Dense candidate pools."""
-    random.seed(SEED)
-    train_samples = []
-    val_samples = []
+def split_questions(gold_rows: list[dict]) -> tuple[list[dict], list[dict]]:
+    """Deterministic 80/20 split by QUESTION, so no question appears in both sets."""
+    shuffled = list(gold_rows)
+    random.Random(SEED).shuffle(shuffled)
+    cut = int(len(shuffled) * 0.8)
+    return shuffled[:cut], shuffled[cut:]
 
-    # 80/20 train/val split on queries
-    shuffled_qa = list(gold_rows)
-    random.shuffle(shuffled_qa)
-    split_idx = int(len(shuffled_qa) * 0.8)
-    train_qa = shuffled_qa[:split_idx]
-    val_qa = shuffled_qa[split_idx:]
+
+def assemble_training_pairs(train_qa: list[dict], val_qa: list[dict], passages: list[dict],
+                            hard_negatives_per_query: int = 4) -> tuple[list, list]:
+    """Build positive and hard-negative pairs from the merged semantic and BM25 pools."""
 
     def _create_examples(qa_subset: list[dict]) -> list[InputExample]:
         examples = []
@@ -66,9 +65,7 @@ def assemble_training_pairs(gold_rows: list[dict], passages: list[dict], hard_ne
                 examples.append(InputExample(texts=[q, neg["text"]], label=0.0))
         return examples
 
-    train_examples = _create_examples(train_qa)
-    val_examples = _create_examples(val_qa)
-    return train_examples, val_examples
+    return _create_examples(train_qa), _create_examples(val_qa)
 
 
 def score_reranker(model: CrossEncoder, gold_rows: list[dict], passages: list[dict], top_k: int = 5) -> dict:
@@ -116,7 +113,9 @@ def main() -> None:
 
     # 2. Mine hard negatives & build datasets
     print("Mining hard negatives and building train/val datasets...")
-    train_samples, val_samples = assemble_training_pairs(gold_rows, passages)
+    train_qa, val_qa = split_questions(gold_rows)
+    print(f"Split: {len(train_qa)} training questions, {len(val_qa)} held-out questions.")
+    train_samples, val_samples = assemble_training_pairs(train_qa, val_qa, passages)
     print(f"Generated {len(train_samples)} training samples, {len(val_samples)} validation samples.")
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -126,7 +125,8 @@ def main() -> None:
     print("\n[1/3] Evaluating Baseline Off-the-Shelf Reranker...")
     base_model = CrossEncoder(STOCK_MODEL, device=device)
     baseline_metrics = score_reranker(base_model, gold_rows, passages)
-    print(f"  Baseline: Hit@5 = {baseline_metrics['hit_rate']:.3f} | Recall@5 = {baseline_metrics['recall']:.3f} | MRR = {baseline_metrics['mrr']:.3f}")
+    baseline_heldout = score_reranker(base_model, val_qa, passages)
+    print(f"  Baseline (all questions): Hit@5 = {baseline_metrics['hit_rate']:.3f} | Recall@5 = {baseline_metrics['recall']:.3f} | MRR = {baseline_metrics['mrr']:.3f}")
 
     # 4. Train / Fine-tune Reranker
     print("\n[2/3] Fine-tuning Cross-Encoder on FastAPI Technical Documentation...")
@@ -150,10 +150,11 @@ def main() -> None:
     print("\n[3/3] Evaluating Fine-Tuned Domain-Adapted Reranker...")
     finetuned_model = CrossEncoder(TUNED_MODEL_DIR, device=device)
     finetuned_metrics = score_reranker(finetuned_model, gold_rows, passages)
+    finetuned_heldout = score_reranker(finetuned_model, val_qa, passages)
 
     # 6. Summary Comparison
     print("\n" + "=" * 85)
-    print("RERANKER FINE-TUNING RESULTS (BEFORE vs. AFTER)")
+    print("RERANKER TUNING, ALL 65 QUESTIONS (includes training questions)")
     print("=" * 85)
     print(f"{'Metric':<20} | {'Baseline (Off-the-Shelf)':<25} | {'Fine-Tuned (Domain-Adapted)':<25} | {'Delta':<10}")
     print("-" * 85)
@@ -163,12 +164,20 @@ def main() -> None:
         delta = f - b
         print(f"{m_name:<20} | {b:<25.3f} | {f:<25.3f} | {delta:+10.3f}")
     print("=" * 85)
+    print(f"\nHELD-OUT questions only (n={len(val_qa)}, never seen in training) -- the number to quote:")
+    for m_key, m_name in [("hit_rate", "Hit Rate@5"), ("recall", "Recall@5"), ("precision", "Precision@5"), ("mrr", "MRR")]:
+        b, f = baseline_heldout[m_key], finetuned_heldout[m_key]
+        print(f"{m_name:<20} | {b:<25.3f} | {f:<25.3f} | {f - b:+10.3f}")
+    print("(The all-questions table above includes training questions and overstates the gain.)")
 
     comparison_payload = {
         "baseline_model": STOCK_MODEL,
         "finetuned_model": TUNED_MODEL_DIR,
         "baseline_metrics": baseline_metrics,
         "finetuned_metrics": finetuned_metrics,
+        "heldout_question_count": len(val_qa),
+        "baseline_heldout_metrics": baseline_heldout,
+        "finetuned_heldout_metrics": finetuned_heldout,
         "training_samples_count": len(train_samples),
         "validation_samples_count": len(val_samples),
     }
