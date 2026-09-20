@@ -1,0 +1,1928 @@
+[
+  {
+    "id": "sh_001",
+    "category": "single_hop",
+    "answer": "To declare that a path parameter should be an integer in FastAPI, you use standard Python type annotations within the function definition. Here's how it looks:\n\n```py\nfrom fastapi import FastAPI\n\napp = FastAPI()\n\n\n@app.get(\"/items/{item_id}\")\nasync def read_item(item_id: int):\n    return {\"item_id\": item_id}\n```\n\nSupport for this comes from the standard Python type annotations, providing editor support like error checking and autocompletion.",
+    "faithfulness_score": 0.75,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "To declare that a path parameter should be an integer in FastAPI, you use standard Python type annotations within the function definition.",
+        "supported": true
+      },
+      {
+        "claim": "Here's how it looks: ```py from fastapi import FastAPI app = FastAPI() @app.get(\"/items/{item_id}\") async def read_item(item_id: int): return {\"item_id\": item_id} ```",
+        "supported": true
+      },
+      {
+        "claim": "Support for this comes from the standard Python type annotations.",
+        "supported": false
+      },
+      {
+        "claim": "Providing editor support like error checking and autocompletion.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_002",
+    "category": "single_hop",
+    "answer": "To declare a path parameter that should be allowed to contain a full file path like `home/johndoe/myfile.txt`, you use the syntax `{parameter_name:path}` in the path operation definition. According to the context, this is done by including `:path` at the end of the parameter name, like so:\n\n```py\n/files/{file_path:path}\n```\n\nThis allows the parameter `file_path` to match any path, enabling URLs such as `/files/home/johndoe/myfile.txt`.",
+    "faithfulness_score": 0.8,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "To declare a path parameter that should be allowed to contain a full file path, you use the syntax `{parameter_name:path}` in the path operation definition.",
+        "supported": true
+      },
+      {
+        "claim": "This syntax is used according to the context by including `:path` at the end of the parameter name.",
+        "supported": true
+      },
+      {
+        "claim": "The syntax example provided is ```py {file_path:path}```.",
+        "supported": false
+      },
+      {
+        "claim": "This allows the parameter `file_path` to match any path.",
+        "supported": true
+      },
+      {
+        "claim": "Therefore, URLs such as `/files/home/johndoe/myfile.txt` are enabled.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_003",
+    "category": "single_hop",
+    "answer": "To set a maximum length of 50 characters on an optional query parameter `q`, you should use `Annotated` with `Query` and set the `max_length` argument to 50. Here's how:\n\n```python\nfrom typing import Annotated\n\nfrom fastapi import FastAPI, Query\n\napp = FastAPI()\n\n\n@app.get(\"/items/\")\nasync def read_items(q: Annotated[str | None, Query(max_length=50)] = None):\n    results = {\"items\": [{\"item_id\": \"Foo\"}, {\"item_id\": \"Bar\"}]}\n    if q:\n        results.update({\"q\": q})\n    return results\n```\n\nThis sets the `q` parameter to be optional (`str | None`) and validates that its length does not exceed 50 characters.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "To set a maximum length of 50 characters on an optional query parameter `q`, you should use `Annotated` with `Query`.",
+        "supported": true
+      },
+      {
+        "claim": "The `max_length` argument is set to 50.",
+        "supported": true
+      },
+      {
+        "claim": "The example uses the `fastapi` library.",
+        "supported": true
+      },
+      {
+        "claim": "The code snippet includes an annotated query parameter `q`.",
+        "supported": true
+      },
+      {
+        "claim": "The parameter `q` is defined as optional (`str | None`).",
+        "supported": true
+      },
+      {
+        "claim": "The function `read_items` is decorated with `@app.get(\"/items/\")`.",
+        "supported": true
+      },
+      {
+        "claim": "The function returns a dictionary containing items.",
+        "supported": true
+      },
+      {
+        "claim": "If the `q` parameter is provided, it is added to the results dictionary.",
+        "supported": true
+      },
+      {
+        "claim": "The example demonstrates setting the `q` parameter to be optional.",
+        "supported": true
+      },
+      {
+        "claim": "The example sets the maximum length of the `q` parameter to 50 characters.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_004",
+    "category": "single_hop",
+    "answer": "You declare a cookie parameter in a FastAPI path operation function using the `Cookie` decorator, similar to how you declare `Path` and `Query` parameters. Here's an example:\n\n```python\nfrom fastapi import FastAPI, Cookie\n\napp = FastAPI()\n\n\n@app.get(\"/items/\")\nasync def read_items(ads_id: Annotated[str | None, Cookie()] = None):\n    return {\"ads_id\": ads_id}\n```\n\nIn this example, `ads_id` is a cookie parameter. The `Annotated` type hint is used to specify that `ads_id` should be a string (`str | None`) and annotated with `Cookie()`. This tells FastAPI to treat `ads_id` as a cookie when parsing the request.",
+    "faithfulness_score": 0.75,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You declare a cookie parameter in a FastAPI path operation function using the `Cookie` decorator.",
+        "supported": true
+      },
+      {
+        "claim": "The example provided uses the `Annotated` type hint to specify the type of the parameter.",
+        "supported": true
+      },
+      {
+        "claim": "The `Annotated` type hint specifies that `ads_id` should be a string (`str | None`).",
+        "supported": true
+      },
+      {
+        "claim": "The `Annotated` type hint also annotates `ads_id` with `Cookie()`.",
+        "supported": false
+      },
+      {
+        "claim": "This tells FastAPI to treat `ads_id` as a cookie when parsing the request.",
+        "supported": false
+      },
+      {
+        "claim": "The example includes an `@app.get(\"/items/\")` decorated function.",
+        "supported": true
+      },
+      {
+        "claim": "Within the function, `ads_id` is defined as a parameter with a default value of `None`.",
+        "supported": true
+      },
+      {
+        "claim": "The parameter `ads_id` is annotated with `Cookie()` to indicate it should be treated as a cookie.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_005",
+    "category": "single_hop",
+    "answer": "You call the `add_task` method on a `BackgroundTasks` object to schedule a task to run after the response is returned.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You call the `add_task` method.",
+        "supported": true
+      },
+      {
+        "claim": "The `add_task` method is called on a `BackgroundTasks` object.",
+        "supported": true
+      },
+      {
+        "claim": "A task is scheduled to run after the response is returned.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_006",
+    "category": "single_hop",
+    "answer": "You use the `CORSMiddleware` class to enable CORS in a FastAPI application.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You use the `CORSMiddleware` class.",
+        "supported": true
+      },
+      {
+        "claim": "The `CORSMiddleware` class enables CORS.",
+        "supported": true
+      },
+      {
+        "claim": "CORS is enabled in a FastAPI application using the `CORSMiddleware` class.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_007",
+    "category": "single_hop",
+    "answer": "You raise an `HTTPException` to report an error to the client.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You can raise an HTTPException to report an error.",
+        "supported": true
+      },
+      {
+        "claim": "The HTTPException is used to report errors to the client.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_008",
+    "category": "single_hop",
+    "answer": "You use `StaticFiles` to serve a directory of static files automatically in FastAPI.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You can use `StaticFiles` in FastAPI.",
+        "supported": true
+      },
+      {
+        "claim": "`StaticFiles` is used to serve static files automatically.",
+        "supported": true
+      },
+      {
+        "claim": "`StaticFiles` requires specifying a directory to serve.",
+        "supported": true
+      },
+      {
+        "claim": "`StaticFiles` integrates with FastAPI to handle file serving.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_009",
+    "category": "single_hop",
+    "answer": "FastAPI's `TestClient` is built on top of HTTPX. This is mentioned in the context as follows: \"The `TestClient` is based on [HTTPX](https://www.python-httpx.org), which in turn is designed based on Requests, so it's very familiar and intuitive.\"",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "FastAPI's `TestClient` is built on top of HTTPX.",
+        "supported": true
+      },
+      {
+        "claim": "This is mentioned in the context as follows: \"The `TestClient` is based on [HTTPX](https://www.python-httpx.org).\"",
+        "supported": true
+      },
+      {
+        "claim": "HTTPX is designed based on Requests.",
+        "supported": true
+      },
+      {
+        "claim": "Therefore, `TestClient` is very familiar and intuitive.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_010",
+    "category": "single_hop",
+    "answer": "FastAPI provides the `jsonable_encoder()` function to convert a Pydantic model (or other Python data type) into something JSON-compatible.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "FastAPI provides a function named `jsonable_encoder()`.",
+        "supported": true
+      },
+      {
+        "claim": "`jsonable_encoder()` converts a Pydantic model into JSON-compatible data.",
+        "supported": true
+      },
+      {
+        "claim": "`jsonable_encoder()` can also convert other Python data types into JSON-compatible data.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_001",
+    "category": "multi_hop",
+    "answer": "When `get_current_user` receives an invalid token, it raises an `HTTPException` with a status code of 401 Unauthorized. This is built on FastAPI's default behavior for handling authentication errors, which is to raise an `HTTPException` with a status code of 401 if the token is invalid or expired.",
+    "faithfulness_score": 0.75,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "When `get_current_user` receives an invalid token, it raises an `HTTPException`.",
+        "supported": true
+      },
+      {
+        "claim": "The raised `HTTPException` has a status code of 401 Unauthorized.",
+        "supported": true
+      },
+      {
+        "claim": "This behavior is based on FastAPI's default handling of authentication errors.",
+        "supported": false
+      },
+      {
+        "claim": "FastAPI raises an `HTTPException` with a status code of 401 when the token is invalid or expired.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_002",
+    "category": "multi_hop",
+    "answer": "No, FastAPI's lifespan startup/shutdown events do not run for sub-applications mounted with `app.mount()`. The currently recommended way to define startup/shutdown logic is using the `lifespan` parameter of the `FastAPI` app. This replaces the need for separate `startup` and `shutdown` event handlers.",
+    "faithfulness_score": 0.3333333333333333,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "FastAPI's lifespan startup/shutdown events do not run for sub-applications mounted with `app.mount()`.",
+        "supported": false
+      },
+      {
+        "claim": "The currently recommended way to define startup/shutdown logic is using the `lifespan` parameter of the `FastAPI` app.",
+        "supported": true
+      },
+      {
+        "claim": "This replaces the need for separate `startup` and `shutdown` event handlers.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "mh_003",
+    "category": "multi_hop",
+    "answer": "No, you cannot set the default value of a parameter using `Query(default=...)` if you put `Query()` inside `Annotated` because it would lead to ambiguity and inconsistency.\n\nUsing `Annotated` is recommended over the older style because it provides better clarity and consistency. When using `Annotated`, the actual default value of the function parameter is used, making it more intuitive and easier to understand. Additionally, calling the function in other places without FastAPI works as expected, and editors and Python will provide appropriate feedback. Using `Query()` directly as the default value requires remembering to pass arguments, leading to potential issues and less predictable behavior.",
+    "faithfulness_score": 0.7142857142857143,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "Using `Annotated` is recommended over the older style.",
+        "supported": true
+      },
+      {
+        "claim": "The actual default value of the function parameter is used when using `Annotated`.",
+        "supported": true
+      },
+      {
+        "claim": "Calling the function in other places without FastAPI works as expected when using `Annotated`.",
+        "supported": true
+      },
+      {
+        "claim": "Editors and Python will provide appropriate feedback when using `Annotated`.",
+        "supported": true
+      },
+      {
+        "claim": "Using `Query()` directly as the default value requires remembering to pass arguments.",
+        "supported": false
+      },
+      {
+        "claim": "Using `Query()` directly as the default value leads to potential issues.",
+        "supported": true
+      },
+      {
+        "claim": "Using `Query()` directly as the default value results in less predictable behavior.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "mh_004",
+    "category": "multi_hop",
+    "answer": "Yes, FastAPI supports arbitrarily deep chains of sub-dependencies. If a chain of dependencies all use `yield`, FastAPI guarantees their cleanup ('exit') code runs in a defined order. This is ensured by FastAPI using Python's Context Managers internally to manage these dependencies correctly.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "FastAPI supports arbitrarily deep chains of sub-dependencies.",
+        "supported": true
+      },
+      {
+        "claim": "If a chain of dependencies all use `yield`, FastAPI guarantees their cleanup runs in a defined order.",
+        "supported": true
+      },
+      {
+        "claim": "FastAPI uses Python's Context Managers internally to manage these dependencies correctly.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "na_001",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this.",
+    "correctly_refused": true
+  },
+  {
+    "id": "na_002",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this.",
+    "correctly_refused": true
+  },
+  {
+    "id": "na_003",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this.",
+    "correctly_refused": true
+  },
+  {
+    "id": "na_004",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this.",
+    "correctly_refused": true
+  },
+  {
+    "id": "na_005",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this question.",
+    "correctly_refused": true
+  },
+  {
+    "id": "sh_011",
+    "category": "single_hop",
+    "answer": "You inherit from `BaseModel` to declare a request body model in FastAPI.",
+    "faithfulness_score": 0.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You can inherit from `BaseModel` in FastAPI.",
+        "supported": false
+      },
+      {
+        "claim": "To declare a request body model in FastAPI, you use inheritance from `BaseModel`.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "sh_012",
+    "category": "single_hop",
+    "answer": "Yes, FastAPI supports arbitrarily deeply nested Pydantic models in a request body. This is shown in the example where an `Offer` model contains a list of `Item` models, which in turn contain an optional list of `Image` models.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "FastAPI supports arbitrarily deeply nested Pydantic models in a request body.",
+        "supported": true
+      },
+      {
+        "claim": "An example where an `Offer` model contains a list of `Item` models exists.",
+        "supported": true
+      },
+      {
+        "claim": "Each `Item` model in the `Offer` model can optionally contain a list of `Image` models.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_013",
+    "category": "single_hop",
+    "answer": "No, FastAPI does not match the Python variable name with the actual HTTP header. By default, FastAPI converts underscores in header parameter names to hyphens to match the conventional naming used in HTTP headers. If you want to keep the underscores in your Python variable names, you must explicitly disable this conversion by setting the `convert_underscores` parameter to `False`.",
+    "faithfulness_score": 0.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "FastAPI does not match Python variable names with actual HTTP headers by default.",
+        "supported": false
+      },
+      {
+        "claim": "FastAPI converts underscores in header parameter names to hyphens.",
+        "supported": false
+      },
+      {
+        "claim": "To keep underscores in Python variable names, the `convert_underscores` parameter must be set to `False`.",
+        "supported": false
+      },
+      {
+        "claim": "If enabled, FastAPI converts underscores in header parameter names to hyphens.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "sh_014",
+    "category": "single_hop",
+    "answer": "FastAPI's `UploadFile` object exposes two attributes for an uploaded file:\n\n1. `filename`: A `str` with the original file name that was uploaded.\n2. `content_type`: A `str` with the content type (MIME type / media type) of the file.\n\nThese attributes provide metadata about the uploaded file.",
+    "faithfulness_score": 0.4,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "UploadFile object exposes two attributes.",
+        "supported": false
+      },
+      {
+        "claim": "The first attribute is filename.",
+        "supported": false
+      },
+      {
+        "claim": "The second attribute is content_type.",
+        "supported": false
+      },
+      {
+        "claim": "filename is a str with the original file name.",
+        "supported": true
+      },
+      {
+        "claim": "content_type is a str with the content type of the file.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_015",
+    "category": "single_hop",
+    "answer": "The FastAPI SQL databases tutorial uses SQLModel as its example ORM/database toolkit.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "The FastAPI SQL databases tutorial exists.",
+        "supported": true
+      },
+      {
+        "claim": "SQLModel is used as an ORM/database toolkit in the tutorial.",
+        "supported": true
+      },
+      {
+        "claim": "The tutorial focuses on SQL databases.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_016",
+    "category": "single_hop",
+    "answer": "You use `APIRouter` to group related path operations into a separate module/file, apart from the main `FastAPI` app instance.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You use `APIRouter` to group related path operations.",
+        "supported": true
+      },
+      {
+        "claim": "`APIRouter` is used to organize path operations.",
+        "supported": true
+      },
+      {
+        "claim": "`APIRouter` groups related path operations into a separate module/file.",
+        "supported": true
+      },
+      {
+        "claim": "`APIRouter` does not belong to the main `FastAPI` app instance directly.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_017",
+    "category": "single_hop",
+    "answer": "Decorating the settings-reading function with `@lru_cache` ensures that the `Settings` object is created only once when the function is first called, and reused for subsequent calls with the same arguments. This avoids reading the `.env` file multiple times for each request, improving performance.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "Decorating the settings-reading function with `@lru_cache` ensures that the `Settings` object is created only once.",
+        "supported": true
+      },
+      {
+        "claim": "Decorating the settings-reading function with `@lru_cache` ensures that the `Settings` object is created when the function is first called.",
+        "supported": true
+      },
+      {
+        "claim": "Decorating the settings-reading function with `@lru_cache` ensures that the `Settings` object is reused for subsequent calls with the same arguments.",
+        "supported": true
+      },
+      {
+        "claim": "`@lru_cache` ensures that the `.env` file is read only once when the function is first called.",
+        "supported": true
+      },
+      {
+        "claim": "`@lru_cache` improves performance by avoiding multiple reads of the `.env` file for each request.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_018",
+    "category": "single_hop",
+    "answer": "The HTTP Basic Auth example uses `secrets.compare_digest()` to compare the provided username/password against the correct ones, specifically to avoid timing attacks.",
+    "faithfulness_score": 0.6666666666666666,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "HTTP Basic Auth uses `secrets.compare_digest()` to compare credentials.",
+        "supported": false
+      },
+      {
+        "claim": "`secrets.compare_digest()` is used to compare provided credentials against correct ones.",
+        "supported": true
+      },
+      {
+        "claim": "`secrets.compare_digest()` is employed to prevent timing attacks.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_019",
+    "category": "single_hop",
+    "answer": "FastAPI raises a `WebSocketDisconnect` exception when a WebSocket connection is closed while you're awaiting `websocket.receive_text()`.",
+    "faithfulness_score": 0.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "FastAPI raises a `WebSocketDisconnect` exception.",
+        "supported": false
+      },
+      {
+        "claim": "A WebSocket connection is closed while awaiting `websocket.receive_text()`.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "sh_020",
+    "category": "single_hop",
+    "answer": "You use `File` for receiving file uploads and `Form` for receiving form fields in the same request. This is evident from the example provided in the context:\n\n```py\nfrom typing import Annotated\n\nfrom fastapi import FastAPI, File, Form, UploadFile\n\napp = FastAPI()\n\n@app.post(\"/files/\")\nasync def create_file(\n    file: Annotated[bytes, File()],\n    fileb: Annotated[UploadFile, File()],\n    token: Annotated[str, Form()],\n):\n    return {\n        \"file_size\": len(file),\n        \"token\": token,\n        \"fileb_content_type\": fileb.content_type,\n    }\n```",
+    "faithfulness_score": 0.75,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You can use `File` for receiving file uploads.",
+        "supported": true
+      },
+      {
+        "claim": "You can use `Form` for receiving form fields.",
+        "supported": true
+      },
+      {
+        "claim": "The example provided uses `File` for receiving file uploads.",
+        "supported": true
+      },
+      {
+        "claim": "The example provided uses `Form` for receiving form fields.",
+        "supported": true
+      },
+      {
+        "claim": "The example provided demonstrates using `File` for receiving file uploads.",
+        "supported": true
+      },
+      {
+        "claim": "The example provided demonstrates using `Form` for receiving form fields.",
+        "supported": true
+      },
+      {
+        "claim": "The example provided includes an annotated function parameter named `file`.",
+        "supported": false
+      },
+      {
+        "claim": "The example provided includes an annotated function parameter named `fileb`.",
+        "supported": true
+      },
+      {
+        "claim": "The example provided includes an annotated function parameter named `token`.",
+        "supported": true
+      },
+      {
+        "claim": "The example provided returns a dictionary containing information about the uploaded file.",
+        "supported": true
+      },
+      {
+        "claim": "The example provided returns the value of the `token` field.",
+        "supported": false
+      },
+      {
+        "claim": "The example provided returns the content type of the uploaded file.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "mh_005",
+    "category": "multi_hop",
+    "answer": "The `HeroPublic` model doesn't expose the `secret_name` field to API clients because it redeclares `id: int` instead of including `secret_name`. This makes a contract with the API clients that `id` will always be present and of type `int` (never `None`). FastAPI relies on this contract specified in the `response_model` to validate and serialize the data accordingly.",
+    "faithfulness_score": 0.6666666666666666,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "The `HeroPublic` model doesn't expose the `secret_name` field to API clients.",
+        "supported": false
+      },
+      {
+        "claim": "It redeclares `id: int` instead of including `secret_name`.",
+        "supported": false
+      },
+      {
+        "claim": "This makes a contract with the API clients that `id` will always be present.",
+        "supported": true
+      },
+      {
+        "claim": "The contract specifies that `id` will never be `None`.",
+        "supported": true
+      },
+      {
+        "claim": "FastAPI relies on this contract specified in the `response_model`.",
+        "supported": true
+      },
+      {
+        "claim": "FastAPI uses this contract to validate and serialize the data accordingly.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_006",
+    "category": "multi_hop",
+    "answer": "Yes, you can add dependencies that apply to the entire FastAPI application by declaring them in the `FastAPI` instance itself, like so:\n\n```py\napp = FastAPI(dependencies=[Depends(get_query_token)])\n```\n\nThese global dependencies will be available for all path operations within the application. This contrasts with router-level dependencies, which are specific to each `APIRouter` and are declared like this:\n\n```py\napp.include_router(users.router, dependencies=[Depends(get_query_token)])\n```\n\nIn a larger application split across multiple files, you would typically define global dependencies once in the main `FastAPI` instance and then include routers with their own specific dependencies as needed. This allows for flexibility while maintaining a clear separation of concerns.",
+    "faithfulness_score": 0.625,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "Dependencies can be added to the entire FastAPI application by declaring them in the `FastAPI` instance.",
+        "supported": true
+      },
+      {
+        "claim": "Global dependencies will be available for all path operations within the application.",
+        "supported": true
+      },
+      {
+        "claim": "Router-level dependencies are specific to each `APIRouter`.",
+        "supported": false
+      },
+      {
+        "claim": "They are declared differently from global dependencies.",
+        "supported": false
+      },
+      {
+        "claim": "In a larger application, global dependencies are defined once in the main `FastAPI` instance.",
+        "supported": true
+      },
+      {
+        "claim": "Routers have their own specific dependencies that are declared differently.",
+        "supported": false
+      },
+      {
+        "claim": "These specific dependencies are used when including routers with their own dependencies.",
+        "supported": true
+      },
+      {
+        "claim": "This approach allows for flexibility while maintaining a clear separation of concerns in a larger application.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_007",
+    "category": "multi_hop",
+    "answer": "To provide a different settings object during tests, you create a dependency override for `get_settings` by defining a new function `get_settings_override` and assigning it to `app.dependency_overrides[get_settings]`. This tells FastAPI to use your custom settings object instead of the default one during tests.\n\nDuring tests, you use the `TestClient` to run HTTP requests against your FastAPI app. The `TestClient` is based on HTTPX, so you can use HTTPX directly to test the API.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "To provide a different settings object during tests, you create a dependency override for `get_settings`.",
+        "supported": true
+      },
+      {
+        "claim": "You define a new function `get_settings_override` and assign it to `app.dependency_overrides[get_settings]`.",
+        "supported": true
+      },
+      {
+        "claim": "This tells FastAPI to use your custom settings object instead of the default one during tests.",
+        "supported": true
+      },
+      {
+        "claim": "During tests, you use the `TestClient` to run HTTP requests against your FastAPI app.",
+        "supported": true
+      },
+      {
+        "claim": "The `TestClient` is based on HTTPX.",
+        "supported": true
+      },
+      {
+        "claim": "You can use HTTPX directly to test the API.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_008",
+    "category": "multi_hop",
+    "answer": "Yes, FastAPI's `Depends`-based dependencies work inside WebSocket endpoints the same way they do in regular HTTP path operations. The example provided in the advanced/websockets.md shows how `Depends`, `Security`, `Cookie`, `Header`, `Path`, and `Query` can be used in WebSocket endpoints just like for other FastAPI endpoints.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "FastAPI's `Depends`-based dependencies work inside WebSocket endpoints.",
+        "supported": true
+      },
+      {
+        "claim": "The example in advanced/websockets.md demonstrates their usage.",
+        "supported": true
+      },
+      {
+        "claim": "`Depends`, `Security`, `Cookie`, `Header`, `Path`, and `Query` can be used in WebSocket endpoints.",
+        "supported": true
+      },
+      {
+        "claim": "They can be used in the same way as for other FastAPI endpoints.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_009",
+    "category": "multi_hop",
+    "answer": "In the HTTP Basic Auth example, when credentials are incorrect, an `HTTPException` with status code 401 and header `WWW-Authenticate` is raised. Yes, FastAPI's general error-handling system supports adding custom headers to an `HTTPException` like that.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "FastAPI's general error-handling system supports adding custom headers to an HTTPException.",
+        "supported": true
+      },
+      {
+        "claim": "When credentials are incorrect in the HTTP Basic Auth example, an HTTPException is raised.",
+        "supported": true
+      },
+      {
+        "claim": "The HTTPException raised in the HTTP Basic Auth example has a status code of 401.",
+        "supported": true
+      },
+      {
+        "claim": "The HTTPException raised in the HTTP Basic Auth example includes a header named `WWW-Authenticate`.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "na_006",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this question.",
+    "correctly_refused": true
+  },
+  {
+    "id": "na_007",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this.",
+    "correctly_refused": true
+  },
+  {
+    "id": "na_008",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this question.",
+    "correctly_refused": true
+  },
+  {
+    "id": "na_009",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this.",
+    "correctly_refused": true
+  },
+  {
+    "id": "sh_021",
+    "category": "single_hop",
+    "answer": "Pydantic's `.model_dump()` method is used to convert a model instance into a plain `dict`.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "Pydantic's `.model_dump()` method exists.",
+        "supported": true
+      },
+      {
+        "claim": "The `.model_dump()` method converts a model instance into a plain `dict`.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_022",
+    "category": "single_hop",
+    "answer": "To mark a path operation as deprecated in FastAPI without removing it, you pass the parameter `deprecated=True` to the path operation decorator.",
+    "faithfulness_score": 0.75,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "To mark a path operation as deprecated in FastAPI, you use the path operation decorator.",
+        "supported": true
+      },
+      {
+        "claim": "The parameter passed to the path operation decorator is `deprecated=True`.",
+        "supported": false
+      },
+      {
+        "claim": "The purpose of using `deprecated=True` is to indicate that the path operation is deprecated.",
+        "supported": true
+      },
+      {
+        "claim": "The path operation decorator is used in FastAPI applications.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_023",
+    "category": "single_hop",
+    "answer": "You use the decorator `@app.middleware(\"http\")` to create a custom middleware in FastAPI. The middleware function receives the `request`, a function `call_next` that receives the `request` as a parameter, and you can further modify the `response` before returning it.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You use the decorator `@app.middleware(\"http\")` to create a custom middleware in FastAPI.",
+        "supported": true
+      },
+      {
+        "claim": "The middleware function receives the `request`.",
+        "supported": true
+      },
+      {
+        "claim": "The middleware function receives a function `call_next` that receives the `request` as a parameter.",
+        "supported": true
+      },
+      {
+        "claim": "You can further modify the `response` before returning it.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_024",
+    "category": "single_hop",
+    "answer": "`TrustedHostMiddleware` protects a FastAPI application against HTTP Host Header attacks by enforcing that all incoming requests have a correctly set `Host` header.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "TrustedHostMiddleware protects a FastAPI application.",
+        "supported": true
+      },
+      {
+        "claim": "TrustedHostMiddleware enforces that all incoming requests have a correctly set `Host` header.",
+        "supported": true
+      },
+      {
+        "claim": "TrustedHostMiddleware is used to prevent HTTP Host Header attacks.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_025",
+    "category": "single_hop",
+    "answer": "FastAPI uses `JSONResponse` as the default response class if you don't declare a `response_model` and don't return a `Response` directly. This is mentioned in the section \"Default response class\" where it states that when creating a FastAPI class instance or an APIRouter, if no `default_response_class` is specified, FastAPI will use `HTMLResponse` by default, but in the context of the question, it refers to JSON responses.",
+    "faithfulness_score": 0.25,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "FastAPI uses `JSONResponse` as the default response class.",
+        "supported": true
+      },
+      {
+        "claim": "If `response_model` is not declared, FastAPI uses `JSONResponse`.",
+        "supported": false
+      },
+      {
+        "claim": "When creating a FastAPI class instance or an APIRouter, if no `default_response_class` is specified, FastAPI uses `HTMLResponse` by default.",
+        "supported": false
+      },
+      {
+        "claim": "The context of the question refers to JSON responses specifically.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "sh_026",
+    "category": "single_hop",
+    "answer": "`RedirectResponse` uses the default status code of `307`. This can be found in the description of the `RedirectResponse` under the section titled \"Available responses\".",
+    "faithfulness_score": 0.6666666666666666,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "`RedirectResponse` uses the default status code of `307`.",
+        "supported": true
+      },
+      {
+        "claim": "This can be found in the description of the `RedirectResponse`.",
+        "supported": true
+      },
+      {
+        "claim": "The section titled \"Available responses\" contains information about `RedirectResponse`.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "sh_027",
+    "category": "single_hop",
+    "answer": "You need to install the `a2wsgi` package to mount a WSGI application inside a FastAPI app.",
+    "faithfulness_score": 0.8,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You need to install the `a2wsgi` package.",
+        "supported": true
+      },
+      {
+        "claim": "The `a2wsgi` package is required.",
+        "supported": true
+      },
+      {
+        "claim": "To mount a WSGI application, You must install the `a2wsgi` package.",
+        "supported": true
+      },
+      {
+        "claim": "The installation of the `a2wsgi` package is necessary.",
+        "supported": true
+      },
+      {
+        "claim": "Mounting a WSGI application inside a FastAPI app requires the `a2wsgi` package.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "sh_028",
+    "category": "single_hop",
+    "answer": "By default, FastAPI's OpenAPI schema is served at `/openapi.json`. This is mentioned in the first part of the provided context.",
+    "faithfulness_score": 0.6666666666666666,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "By default, FastAPI's OpenAPI schema is served.",
+        "supported": true
+      },
+      {
+        "claim": "This is mentioned in the first part of the provided context.",
+        "supported": false
+      },
+      {
+        "claim": "The OpenAPI schema is served at `/openapi.json`.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_029",
+    "category": "single_hop",
+    "answer": "The `security_scopes` parameter inside the `get_current_user` dependency has the type `SecurityScopes`. It exposes a property `scopes` that lists all the required scopes.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "The `security_scopes` parameter inside the `get_current_user` dependency has the type `SecurityScopes`.",
+        "supported": true
+      },
+      {
+        "claim": "It exposes a property `scopes`.",
+        "supported": true
+      },
+      {
+        "claim": "The `scopes` property lists all the required scopes.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_030",
+    "category": "single_hop",
+    "answer": "If you want maximum JSON serialization performance, the recommended approach is to use a Response Model. This is stated directly in the text: \"If what you are looking for is performance, you are probably better off using a Response Model than an orjson response.\"",
+    "faithfulness_score": 0.8333333333333334,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "If your goal is maximum JSON serialization performance, a Response Model is recommended.",
+        "supported": true
+      },
+      {
+        "claim": "The recommendation comes from a statement in the text.",
+        "supported": true
+      },
+      {
+        "claim": "Using a Response Model is suggested when performance is the priority.",
+        "supported": true
+      },
+      {
+        "claim": "The text explicitly states that a Response Model is preferable for performance.",
+        "supported": true
+      },
+      {
+        "claim": "The text indicates that orjson is not the preferred choice for performance.",
+        "supported": false
+      },
+      {
+        "claim": "The text suggests that a Response Model is better suited for performance needs.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_010",
+    "category": "multi_hop",
+    "answer": "When adding multiple middlewares to a FastAPI app, they run in the order they were added, with the last one added being the outermost and the first one being the innermost. This means that on the request path, the last middleware added runs first, and on the response path, it runs last.\n\nRegarding `CORSMiddleware`, it follows the same general ordering rule as described. When you add `CORSMiddleware` to your FastAPI app, it is added to the middleware stack. Therefore, it will run after any other middlewares you've added but before the actual route handler.",
+    "faithfulness_score": 0.625,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "When adding multiple middlewares to a FastAPI app, they run in the order they were added.",
+        "supported": true
+      },
+      {
+        "claim": "The last middleware added runs the outermost on the request path.",
+        "supported": false
+      },
+      {
+        "claim": "The first middleware added runs the innermost on the request path.",
+        "supported": false
+      },
+      {
+        "claim": "On the response path, the last middleware added runs first.",
+        "supported": false
+      },
+      {
+        "claim": "On the response path, it runs last.",
+        "supported": true
+      },
+      {
+        "claim": "Regarding `CORSMiddleware`, it follows the same general ordering rule as described for other middlewares.",
+        "supported": true
+      },
+      {
+        "claim": "When you add `CORSMiddleware` to your FastAPI app, it is added to the middleware stack.",
+        "supported": true
+      },
+      {
+        "claim": "`CORSMiddleware` runs after any other middlewares you've added but before the actual route handler.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_011",
+    "category": "multi_hop",
+    "answer": "Yes, the sub-dependency `get_current_user` also requires the scope `\"me\"` to be verified. This is because `get_current_active_user` includes the scope `\"me\"` in its `security_scopes.scopes` list, and since `get_current_user` is a sub-dependency of `get_current_active_user`, it inherits the required scopes.\n\nRegarding the general FastAPI concept explaining why a dependency can have sub-dependencies, it is based on the idea of dependency injection. Dependencies allow you to inject functionality into other parts of your application without tightly coupling them. By defining sub-dependencies, you can compose complex behaviors from simpler ones, making your code more modular and easier to test and maintain.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "Dependencies can be used to inject functionality into other parts of an application.",
+        "supported": true
+      },
+      {
+        "claim": "FastAPI allows dependencies to have sub-dependencies.",
+        "supported": true
+      },
+      {
+        "claim": "Sub-dependencies in FastAPI compose complex behaviors from simpler ones.",
+        "supported": true
+      },
+      {
+        "claim": "Dependency injection is the basis for allowing dependencies to have sub-dependencies in FastAPI.",
+        "supported": true
+      },
+      {
+        "claim": "Sub-dependencies inherit the required scopes from their parent dependencies.",
+        "supported": true
+      },
+      {
+        "claim": "The scope `\"me\"` is included in `security_scopes.scopes` list of `get_current_active_user`.",
+        "supported": true
+      },
+      {
+        "claim": "`get_current_user` is a sub-dependency of `get_current_active_user`.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_012",
+    "category": "multi_hop",
+    "answer": "If you return a `Response` object directly from a path operation instead of a `dict`/Pydantic model, FastAPI will not validate or serialize its contents using your declared `response_model`. Instead, you have to handle validation and serialization yourself.\n\nTo put non-JSON-serializable data (like a `datetime`) into that raw `Response`, you would need to manually encode the data to JSON before returning the `Response`. This typically involves using a library like `orjson` for faster serialization or manually implementing the serialization logic.",
+    "faithfulness_score": 0.5,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "FastAPI does not validate or serialize contents of a `Response` object if returned directly.",
+        "supported": true
+      },
+      {
+        "claim": "To handle non-JSON-serializable data, manual encoding to JSON is required.",
+        "supported": false
+      },
+      {
+        "claim": "Returning a `Response` object without a `dict` or Pydantic model bypasses validation and serialization.",
+        "supported": true
+      },
+      {
+        "claim": "Handling non-JSON-serializable data involves manually encoding the data to JSON.",
+        "supported": false
+      },
+      {
+        "claim": "Using a library like `orjson` can be beneficial for faster serialization.",
+        "supported": true
+      },
+      {
+        "claim": "Manually implementing serialization logic is another approach to handle non-JSON-serializable data.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "mh_013",
+    "category": "multi_hop",
+    "answer": "The pattern of creating `UserInDB` by unpacking `user_in.model_dump()` and adding a `hashed_password` is useful because it reduces code duplication. By defining a `UserBase` class and making `UserInDB` a subclass of `UserBase`, the shared attributes and validations are defined once in `UserBase`. This allows `UserInDB` to inherit those definitions without repeating them, thus adhering to the 'Reduce duplication' principle.\n\nSpecifically, when `UserIn` is passed to `fake_save_user()`, it uses `model_dump()` to convert the instance into a dictionary, which is then used to initialize `UserInDB`. Adding `hashed_password` ensures that the hashed version of the password is included in the database representation, aligning with the requirement to store hashed passwords securely. This approach maintains consistency across different representations of the user model while keeping the codebase cleaner and easier to maintain.",
+    "faithfulness_score": 0.8,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "UserIn is converted into a dictionary using `model_dump()`.",
+        "supported": true
+      },
+      {
+        "claim": "`UserInDB` is defined as a subclass of `UserBase`.",
+        "supported": false
+      },
+      {
+        "claim": "`UserBase` contains shared attributes and validations.",
+        "supported": true
+      },
+      {
+        "claim": "`UserInDB` inherits these definitions from `UserBase`.",
+        "supported": false
+      },
+      {
+        "claim": "`fake_save_user()` passes `UserIn` to create `UserInDB`.",
+        "supported": true
+      },
+      {
+        "claim": "`UserInDB` includes a `hashed_password` attribute.",
+        "supported": true
+      },
+      {
+        "claim": "`hashed_password` ensures secure storage of passwords.",
+        "supported": true
+      },
+      {
+        "claim": "This approach reduces code duplication.",
+        "supported": true
+      },
+      {
+        "claim": "It maintains consistency across different user model representations.",
+        "supported": true
+      },
+      {
+        "claim": "It keeps the codebase cleaner and easier to maintain.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_014",
+    "category": "multi_hop",
+    "answer": "No, returning a `Response` object directly is not sufficient on its own. According to the context, if you want to override the response class used by a path operation (like `HTMLResponse`) and have it correctly documented in the OpenAPI schema, you need to use both the `response_class` parameter in the path operation decorator and return a `Response` object. The `response_class` parameter is used solely for documenting the OpenAPI path operation, while the `Response` object returned by your function is used as is.",
+    "faithfulness_score": 0.75,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "Returning a `Response` object directly is not sufficient on its own.",
+        "supported": true
+      },
+      {
+        "claim": "To override the response class used by a path operation, you need to use both the `response_class` parameter in the path operation decorator and return a `Response` object.",
+        "supported": true
+      },
+      {
+        "claim": "The `response_class` parameter is used solely for documenting the OpenAPI path operation.",
+        "supported": false
+      },
+      {
+        "claim": "The `Response` object returned by your function is used as is.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_015",
+    "category": "multi_hop",
+    "answer": "The Metadata tutorial does not explain how to assign a given path operation to one of the tags specified in the `tags_metadata`. It only mentions that the order of the dictionaries in `tags_metadata` determines the order of the tags in the docs UI. Therefore, I don't have enough information in the provided context to answer this question.",
+    "faithfulness_score": null,
+    "abstained": true,
+    "claims": [
+      {
+        "claim": "The Metadata tutorial does not explain how to assign a given path operation to one of the tags specified in the `tags_metadata`.",
+        "supported": false
+      },
+      {
+        "claim": "The Metadata tutorial mentions that the order of the dictionaries in `tags_metadata` determines the order of the tags in the docs UI.",
+        "supported": true
+      },
+      {
+        "claim": "There is not enough information in the provided context to answer how to assign a given path operation to one of the tags specified in the `tags_metadata`.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "na_010",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this.",
+    "correctly_refused": true
+  },
+  {
+    "id": "na_011",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this.",
+    "correctly_refused": true
+  },
+  {
+    "id": "sh_031",
+    "category": "single_hop",
+    "answer": "You would use `UUID` from the `uuid` module to declare a path operation parameter that should accept a UUID value. This can be seen in the example provided in the context, where `UUID` is used for a path parameter.",
+    "faithfulness_score": 0.75,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You would use `UUID` from the `uuid` module.",
+        "supported": true
+      },
+      {
+        "claim": "To declare a path operation parameter, you would use `UUID`.",
+        "supported": false
+      },
+      {
+        "claim": "This can be seen in the context.",
+        "supported": true
+      },
+      {
+        "claim": "The example provided uses `UUID` for a path parameter.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_032",
+    "category": "single_hop",
+    "answer": "No, FastAPI does not include additional status codes (returned by directly returning a `Response`/`JSONResponse` with a custom status code) in the generated OpenAPI schema. According to the context, FastAPI doesn't have a way to know beforehand what additional status codes you might return, and thus these additional status codes won't be included in the OpenAPI schema.",
+    "faithfulness_score": 0.75,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "FastAPI does not include additional status codes in the generated OpenAPI schema.",
+        "supported": false
+      },
+      {
+        "claim": "Additional status codes returned by FastAPI cannot be known beforehand.",
+        "supported": true
+      },
+      {
+        "claim": "These additional status codes will not be included in the OpenAPI schema according to the context.",
+        "supported": true
+      },
+      {
+        "claim": "FastAPI does not have a mechanism to anticipate and include additional status codes in the OpenAPI schema.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_033",
+    "category": "single_hop",
+    "answer": "The `OAuth2PasswordRequestForm` dependency gives you access to the `username` and `password` fields specifically, whereas a raw `scope` string would just be a plain text string indicating the desired permissions without providing the credentials.",
+    "faithfulness_score": 0.5,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "The `OAuth2PasswordRequestForm` dependency provides access to the `username` and `password` fields.",
+        "supported": true
+      },
+      {
+        "claim": "A raw `scope` string indicates desired permissions without credentials.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "sh_034",
+    "category": "single_hop",
+    "answer": "No, the return value of the dependency function is not made available inside the path operation function.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "The return value of the dependency function is not made available inside the path operation function.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_035",
+    "category": "single_hop",
+    "answer": "You use the `webhooks` attribute on a FastAPI app instance to define OpenAPI webhooks, analogous to how you'd define a normal path operation.",
+    "faithfulness_score": 0.6666666666666666,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You use the `webhooks` attribute on a FastAPI app instance.",
+        "supported": true
+      },
+      {
+        "claim": "The `webhooks` attribute is used to define OpenAPI webhooks.",
+        "supported": false
+      },
+      {
+        "claim": "OpenAPI webhooks are defined analogously to normal path operations.",
+        "supported": false
+      },
+      {
+        "claim": "The `webhooks` attribute is part of a FastAPI app instance.",
+        "supported": true
+      },
+      {
+        "claim": "Webhooks are defined using the `webhooks` attribute.",
+        "supported": true
+      },
+      {
+        "claim": "This attribute allows defining webhook operations in a FastAPI application.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_036",
+    "category": "single_hop",
+    "answer": "You use `APIRouter` to create a set of callback path operations that document how an external API should look, before attaching them to the main path operation.",
+    "faithfulness_score": 0.6666666666666666,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You use `APIRouter` to create a set of callback path operations.",
+        "supported": true
+      },
+      {
+        "claim": "You can document how an external API should look using `APIRouter`.",
+        "supported": true
+      },
+      {
+        "claim": "`APIRouter` attaches the created callback path operations to the main path operation.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "sh_037",
+    "category": "single_hop",
+    "answer": "The `get_current_user` dependency ultimately returns a Pydantic model type defined as `User`.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "The `get_current_user` dependency exists.",
+        "supported": true
+      },
+      {
+        "claim": "It ultimately returns a value.",
+        "supported": true
+      },
+      {
+        "claim": "The returned value is of a Pydantic model type.",
+        "supported": true
+      },
+      {
+        "claim": "The Pydantic model type is defined as `User`.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_038",
+    "category": "single_hop",
+    "answer": "You can add `examples` for a Pydantic model inside the `model_config` dictionary under the key `\"json_schema_extra\"`.",
+    "faithfulness_score": 0.6666666666666666,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "You can add examples for a Pydantic model inside a Pydantic model.",
+        "supported": true
+      },
+      {
+        "claim": "The location to add examples is within the `model_config` dictionary.",
+        "supported": false
+      },
+      {
+        "claim": "The specific key used in the `model_config` dictionary is `\"json_schema_extra\"`.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_039",
+    "category": "single_hop",
+    "answer": "The Simple OAuth2 tutorial recommends hashing passwords before storing them in a database instead of storing them as plaintext because if the database is stolen, the thief won't have the users' plaintext passwords. Without the actual passwords, the thief cannot attempt to use those same passwords in other systems, which could be dangerous since many users use the same password everywhere.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "Passwords are stored in a database.",
+        "supported": true
+      },
+      {
+        "claim": "Hashing passwords is recommended before storing them.",
+        "supported": true
+      },
+      {
+        "claim": "Storing passwords as plaintext is insecure.",
+        "supported": true
+      },
+      {
+        "claim": "If the database is stolen, the thief will not have the users' plaintext passwords.",
+        "supported": true
+      },
+      {
+        "claim": "Without the actual passwords, the thief cannot attempt to use those passwords elsewhere.",
+        "supported": true
+      },
+      {
+        "claim": "Using the same password in different systems can be dangerous.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "sh_040",
+    "category": "single_hop",
+    "answer": "When an inactive user tries to authenticate, the response returned to the client includes a JSON detail field with the value \"Inactive user\".",
+    "faithfulness_score": 0.6666666666666666,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "An inactive user attempts authentication.",
+        "supported": true
+      },
+      {
+        "claim": "The response returned to the client includes a JSON detail field.",
+        "supported": true
+      },
+      {
+        "claim": "The JSON detail field has the value \"Inactive user\".",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "mh_016",
+    "category": "multi_hop",
+    "answer": "The 'Dependencies in path operation decorators' docs mention that dependencies with no return value are still useful because they can require things like headers or raise exceptions. This relates to the `verify_token`-style pattern by showing how such dependencies can be attached to a single path operation without needing their return value. They execute the logic required (checking headers) but do not pass the result to the path operation function.\n\nRegarding whether this 'attach a dependency without using its return value' idea extends to whole applications, not just single path operations, the answer is yes. The same concept applies to adding dependencies to the `FastAPI` application itself. By doing so, these dependencies will be executed for all path operations within the application, similar to how they were attached to individual path operations.",
+    "faithfulness_score": 1.0,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "The 'Dependencies in path operation decorators' docs mention dependencies with no return value.",
+        "supported": true
+      },
+      {
+        "claim": "Dependencies with no return value are still useful according to the 'Dependencies in path operation decorators' docs.",
+        "supported": true
+      },
+      {
+        "claim": "They can require things like headers or raise exceptions.",
+        "supported": true
+      },
+      {
+        "claim": "This relates to the `verify_token`-style pattern by showing how such dependencies can be attached to a single path operation.",
+        "supported": true
+      },
+      {
+        "claim": "Such dependencies do not pass the result to the path operation function.",
+        "supported": true
+      },
+      {
+        "claim": "The 'attach a dependency without using its return value' idea extends to whole FastAPI applications.",
+        "supported": true
+      },
+      {
+        "claim": "Dependencies added to the `FastAPI` application will be executed for all path operations within the application.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_017",
+    "category": "multi_hop",
+    "answer": "The actual dependency chain, from the path operation down to the raw token, by the end of the Simple OAuth2 tutorial is:\n\n1. Path Operation `/users/me`\n   - Dependency: `get_current_active_user`\n     - Sub-dependency: `get_current_user`\n       - Sub-dependency: `oauth2_scheme`\n\n2. Path Operation `/token`\n   - Dependency: `get_current_user`\n     - Sub-dependency: `oauth2_scheme`\n\n3. Raw Token\n\nSo starting from the raw token, the chain goes through `oauth2_scheme` -> `get_current_user` -> `get_current_active_user` -> `/users/me`.",
+    "faithfulness_score": 0.36363636363636365,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "The actual dependency chain starts from the raw token.",
+        "supported": false
+      },
+      {
+        "claim": "The dependency chain goes through oauth2_scheme.",
+        "supported": true
+      },
+      {
+        "claim": "oauth2_scheme has a sub-dependency of get_current_user.",
+        "supported": false
+      },
+      {
+        "claim": "get_current_user has a sub-dependency of oauth2_scheme.",
+        "supported": true
+      },
+      {
+        "claim": "The dependency chain ends at get_current_active_user.",
+        "supported": false
+      },
+      {
+        "claim": "get_current_active_user has a sub-dependency of /users/me.",
+        "supported": false
+      },
+      {
+        "claim": "/users/me has a dependency of get_current_active_user.",
+        "supported": true
+      },
+      {
+        "claim": "/users/me has a dependency of /users/me.",
+        "supported": false
+      },
+      {
+        "claim": "/token has a dependency of get_current_user.",
+        "supported": false
+      },
+      {
+        "claim": "get_current_user has a sub-dependency of oauth2_scheme.",
+        "supported": true
+      },
+      {
+        "claim": "The dependency chain ends at /token.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "mh_018",
+    "category": "multi_hop",
+    "answer": "No, returning a `Response`/`JSONResponse` with the additional status code is not enough on its own. According to the context, additional responses including their status codes must be declared explicitly using the `Response` class to be included in the OpenAPI schema and thus documented in the API docs. Returning a `Response` directly without declaring additional responses will result in those responses not being included in the OpenAPI schema.",
+    "faithfulness_score": 0.8,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "Returning a `Response`/`JSONResponse` with the additional status code is not enough on its own.",
+        "supported": true
+      },
+      {
+        "claim": "Additional responses including their status codes must be declared explicitly using the `Response` class.",
+        "supported": true
+      },
+      {
+        "claim": "Returning a `Response` directly without declaring additional responses will result in those responses not being included in the OpenAPI schema.",
+        "supported": true
+      },
+      {
+        "claim": "Additional responses must be declared explicitly using the `Response` class to be included in the OpenAPI schema.",
+        "supported": true
+      },
+      {
+        "claim": "Those responses must be documented in the API docs if they are to be included in the OpenAPI schema.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "mh_019",
+    "category": "multi_hop",
+    "answer": "Both 'Declare Request Example Data' and 'OpenAPI Callbacks' exist to document aspects of the API that FastAPI cannot infer automatically from the normal code structure. \n\nFor 'Declare Request Example Data', it solves the problem of providing examples for different input formats and values that aren't inferred by FastAPI. For instance, if you want to show how a request body should be formatted, you can define these examples explicitly. This allows users to see concrete examples of valid inputs in the API documentation.\n\nOn the other hand, 'OpenAPI Callbacks' allow you to document additional status codes and responses that are returned by your application but are not known ahead of time. These callbacks let you specify custom responses that FastAPI would otherwise omit from its generated OpenAPI schema. This is useful when your application returns special status codes or custom responses that are not part of the standard HTTP response codes.\n\nIn summary, while 'Declare Request Example Data' deals with providing concrete examples of request data, 'OpenAPI Callbacks' handle documenting responses that are not part of the standard HTTP response codes. Both features help ensure that the API documentation accurately reflects the behavior of the application.",
+    "faithfulness_score": 0.42857142857142855,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "\"Declare Request Example Data\" exists to document aspects of the API that FastAPI cannot infer automatically from the normal code structure.",
+        "supported": true
+      },
+      {
+        "claim": "'OpenAPI Callbacks' allow you to document additional status codes and responses that are returned by your application but are not known ahead of time.",
+        "supported": false
+      },
+      {
+        "claim": "'OpenAPI Callbacks' let you specify custom responses that FastAPI would otherwise omit from its generated OpenAPI schema.",
+        "supported": false
+      },
+      {
+        "claim": "'Declare Request Example Data' solves the problem of providing examples for different input formats and values that aren't inferred by FastAPI.",
+        "supported": true
+      },
+      {
+        "claim": "'Declare Request Example Data' allows users to see concrete examples of valid inputs in the API documentation.",
+        "supported": true
+      },
+      {
+        "claim": "'OpenAPI Callbacks' are useful when your application returns special status codes or custom responses that are not part of the standard HTTP response codes.",
+        "supported": false
+      },
+      {
+        "claim": "Both 'Declare Request Example Data' and 'OpenAPI Callbacks' help ensure that the API documentation accurately reflects the behavior of the application.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "mh_020",
+    "category": "multi_hop",
+    "answer": "The key structural difference lies in the declaration of the operations:\n\nFor OpenAPI Webhooks, you declare a webhook by specifying a path and HTTP method, like `@app.webhooks.post(\"new-subscription\")`. This defines a webhook event that your app can trigger.\n\nFor OpenAPI Callbacks, you declare a callback by specifying a path operation that triggers a request to an external API. You define the path, HTTP method, and any required parameters or body content, similar to defining a path operation for a normal API endpoint, but with the intention that this path operation will internally call another API.\n\nSo, while both involve FastAPI documenting requests sent to an external API, Webhooks focus on events triggered by your app, whereas Callbacks focus on your app making explicit API calls to another system.",
+    "faithfulness_score": 0.4,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "The key structural difference lies in the declaration of the operations.",
+        "supported": true
+      },
+      {
+        "claim": "For OpenAPI Webhooks, you declare a webhook by specifying a path and HTTP method.",
+        "supported": false
+      },
+      {
+        "claim": "For OpenAPI Callbacks, you declare a callback by specifying a path operation.",
+        "supported": false
+      },
+      {
+        "claim": "Webhooks focus on events triggered by your app.",
+        "supported": true
+      },
+      {
+        "claim": "Callbacks focus on your app making explicit API calls to another system.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "na_012",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this.",
+    "correctly_refused": true
+  },
+  {
+    "id": "na_013",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this.",
+    "correctly_refused": true
+  },
+  {
+    "id": "na_014",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this question.",
+    "correctly_refused": true
+  },
+  {
+    "id": "na_015",
+    "category": "no_answer",
+    "answer": "I don't have enough information in the provided context to answer this question.",
+    "correctly_refused": true
+  },
+  {
+    "id": "mh_021",
+    "category": "multi_hop",
+    "answer": "These are describing two genuinely different approaches to reducing repeated query-parameter declarations. The Classes as Dependencies tutorial demonstrates using a class as a dependency, leveraging the fact that instantiation of a class follows the same syntax as calling a function. This allows for passing parameters to the class constructor when creating an instance of the class, which then becomes a dependency.\n\nOn the other hand, the Query Parameter Models tutorial discusses using Pydantic models to declare query parameters. This approach groups related query parameters into a single Pydantic model, allowing for reusability and centralized validation and metadata declaration across multiple parts of the application. These techniques serve different purposes and are not interchangeable; one uses class instantiation as a dependency while the other uses Pydantic models for query parameter management.",
+    "faithfulness_score": 0.7,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "These are describing two genuinely different approaches to reducing repeated query-parameter declarations.",
+        "supported": false
+      },
+      {
+        "claim": "The Classes as Dependencies tutorial demonstrates using a class as a dependency.",
+        "supported": true
+      },
+      {
+        "claim": "This allows for passing parameters to the class constructor when creating an instance of the class.",
+        "supported": true
+      },
+      {
+        "claim": "This approach allows for passing parameters to the class constructor.",
+        "supported": true
+      },
+      {
+        "claim": "The Query Parameter Models tutorial discusses using Pydantic models to declare query parameters.",
+        "supported": true
+      },
+      {
+        "claim": "This approach groups related query parameters into a single Pydantic model.",
+        "supported": false
+      },
+      {
+        "claim": "Pydantic models allow for reusability and centralized validation and metadata declaration.",
+        "supported": true
+      },
+      {
+        "claim": "These techniques serve different purposes and are not interchangeable.",
+        "supported": true
+      },
+      {
+        "claim": "One uses class instantiation as a dependency.",
+        "supported": true
+      },
+      {
+        "claim": "The other uses Pydantic models for query parameter management.",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "mh_022",
+    "category": "multi_hop",
+    "answer": "Yes, both the Pydantic-model version and the plain (non-model) version of header parameters allow disabling the automatic conversion of underscores to hyphens. This can be done by setting the `convert_underscores` parameter to `False`. The relevant parts of the context supporting this are:\n\n- For the Pydantic-model version:\n  ```py\n  from typing import Annotated\n\n  from fastapi import FastAPI, Header\n\n  app = FastAPI()\n\n  @app.get(\"/items/\")\n  async def read_items(\n      strange_header: Annotated[str | None, Header(convert_underscores=False)] = None,\n  ):\n      return {\"strange_header\": strange_header}\n  ```\n\n- For the plain (non-model) version:\n  ```py\n  from fastapi import FastAPI, Header\n\n  app = FastAPI()\n\n  @app.get(\"/items/\")\n  async def read_items(\n      headers: Annotated[CommonHeaders, Header(convert_underscores=False)],\n  ):\n      return headers\n  ```",
+    "faithfulness_score": 0.42857142857142855,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "The Pydantic-model version allows disabling underscore-to-hyphen conversion.",
+        "supported": true
+      },
+      {
+        "claim": "The plain (non-model) version also allows disabling underscore-to-hyphen conversion.",
+        "supported": false
+      },
+      {
+        "claim": "For the Pydantic-model version, the conversion can be disabled by setting the `convert_underscores` parameter to `False`.",
+        "supported": true
+      },
+      {
+        "claim": "For the plain (non-model) version, the conversion can be disabled by setting the `convert_underscores` parameter to `False`.",
+        "supported": false
+      },
+      {
+        "claim": "An example using the Pydantic-model version is provided.",
+        "supported": true
+      },
+      {
+        "claim": "An example using the plain (non-model) version is provided.",
+        "supported": false
+      },
+      {
+        "claim": "The Pydantic-model version example uses `Annotated` for specifying the header parameter.",
+        "supported": true
+      },
+      {
+        "claim": "The plain (non-model) version example directly uses `Header` for specifying the header parameter.",
+        "supported": false
+      },
+      {
+        "claim": "The Pydantic-model version example sets `convert_underscores=False` for the `strange_header` parameter.",
+        "supported": false
+      },
+      {
+        "claim": "The plain (non-model) version example sets `convert_underscores=False` for the `headers` parameter.",
+        "supported": false
+      },
+      {
+        "claim": "The Pydantic-model version example is part of a FastAPI application.",
+        "supported": true
+      },
+      {
+        "claim": "The plain (non-model) version example is part of a FastAPI application.",
+        "supported": true
+      },
+      {
+        "claim": "The Pydantic-model version example defines a route at \"/items/\".",
+        "supported": false
+      },
+      {
+        "claim": "The plain (non-model) version example defines a route at \"/items/\".",
+        "supported": false
+      }
+    ]
+  },
+  {
+    "id": "mh_023",
+    "category": "multi_hop",
+    "answer": "The Behind a Proxy documentation states that if your FastAPI app is deployed behind a proxy that strips a path prefix (using `root_path`), and you're also mounting a sub-application, `root_path` handling works normally. It mentions that FastAPI will internally use the `root_path` smartly, so it will just work.",
+    "faithfulness_score": 0.8,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "The documentation for FastAPI mentions handling of `root_path`.",
+        "supported": true
+      },
+      {
+        "claim": "If your FastAPI app is behind a proxy that strips a path prefix using `root_path`, it applies to FastAPI's internal usage.",
+        "supported": false
+      },
+      {
+        "claim": "FastAPI will internally use `root_path` smartly when dealing with a proxy that strips a path prefix.",
+        "supported": true
+      },
+      {
+        "claim": "Mounting a sub-application alongside a FastAPI app that uses `root_path` is mentioned to work normally according to the documentation.",
+        "supported": true
+      },
+      {
+        "claim": "The documentation specifically addresses how `root_path` handling works in such scenarios.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_024",
+    "category": "multi_hop",
+    "answer": "Customizing operation IDs for cleaner client method names involves a separate configuration path from using `tags`. The context mentions customizing operation IDs by passing a `generate_unique_id_function` to FastAPI, which allows naming the operation IDs differently than their default generation. This customization is not directly tied to the `tags` mechanism discussed in the Path Operation Configuration section.",
+    "faithfulness_score": 0.75,
+    "abstained": false,
+    "claims": [
+      {
+        "claim": "Customizing operation IDs for cleaner client method names involves a separate configuration path from using `tags`.",
+        "supported": false
+      },
+      {
+        "claim": "The context mentions customizing operation IDs by passing a `generate_unique_id_function` to FastAPI.",
+        "supported": true
+      },
+      {
+        "claim": "This customization allows naming the operation IDs differently than their default generation.",
+        "supported": true
+      },
+      {
+        "claim": "This customization is not directly tied to the `tags` mechanism discussed in the Path Operation Configuration section.",
+        "supported": true
+      }
+    ]
+  },
+  {
+    "id": "mh_025",
+    "category": "multi_hop",
+    "answer": "I don't have enough information in the provided context to answer this.",
+    "faithfulness_score": null,
+    "abstained": true,
+    "claims": []
+  }
+]
