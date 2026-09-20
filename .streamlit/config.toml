@@ -1,8 +1,10 @@
 [server]
 port = 8501
 headless = true
-enableCORS = true
-enableXsrfProtection = false
+# CORS and XSRF protection stay at Streamlit's defaults (on).
+
+[browser]
+gatherUsageStats = false
 
 [theme]
 base = "dark"

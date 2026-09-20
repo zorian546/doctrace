@@ -32,16 +32,24 @@ RUN pip install --no-cache-dir --pre \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Run as an unprivileged user (uid 1000, which Hugging Face Spaces also expects).
+# The Hugging Face cache directory is created here, owned by that user, so a named
+# volume mounted on it inherits the right ownership.
+RUN useradd --create-home --uid 1000 doctrace && mkdir -p /home/doctrace/.cache/huggingface && chown -R doctrace:doctrace /home/doctrace /srv/doctrace
+ENV HOME=/home/doctrace HF_HOME=/home/doctrace/.cache/huggingface
+
 # Package code plus the runtime data: passages.json feeds the keyword index and the
 # saved reports back /v1/scorecard. data/raw/ stays out of the image; only the
 # offline indexing script uses it.
-COPY doctrace/ doctrace/
-COPY data/processed/ data/processed/
-COPY dashboard.py .
+COPY --chown=doctrace:doctrace doctrace/ doctrace/
+COPY --chown=doctrace:doctrace data/processed/ data/processed/
+COPY --chown=doctrace:doctrace dashboard.py .
 # Tuned cross-encoder. doctrace/search/fusion.py falls back to the stock model when
 # the weights are missing, so a build without Git LFS objects still runs, just
 # without the gain from tuning on this corpus.
-COPY models/docs-reranker-minilm/ models/docs-reranker-minilm/
+COPY --chown=doctrace:doctrace models/docs-reranker-minilm/ models/docs-reranker-minilm/
+
+USER doctrace
 
 EXPOSE 8000
 EXPOSE 8501

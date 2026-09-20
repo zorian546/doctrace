@@ -49,6 +49,8 @@ fastapi==0.141.1
 starlette==1.6.0
 uvicorn
 streamlit==1.59.2
+requests   # dashboard -> HTTP service
+pandas     # dashboard tables and charts
 
 # Tests
 pytest
